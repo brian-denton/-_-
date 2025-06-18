@@ -68,8 +68,17 @@ jobs:
       - name: Build application
         run: npm run build
         env:
-          # Add any environment variables needed for build
+          # Environment for build
           NODE_ENV: production
+          # Mock environment variables for CI
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci_test"
+          NEXT_PUBLIC_SUPABASE_URL: "https://mock-supabase-url.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "mock-anon-key-for-ci"
+          SUPABASE_SERVICE_ROLE_KEY: "mock-service-role-key-for-ci"
+          LOG_LEVEL: "error"
+          LOG_TO_DATABASE: "false"
+          LOG_TO_FILE: "false"
+          LOG_RETENTION_DAYS: "30"
 
       # Upload build artifacts (optional - useful for deployment)
       - name: Upload build artifacts
@@ -105,4 +114,4 @@ jobs:
 
       # Generate database schema to ensure it's valid
       - name: Generate database schema
-        run: npm run db:generate
+        run: npx drizzle-kit generate --config=drizzle.config.ci.ts
