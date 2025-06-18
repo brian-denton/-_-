@@ -2,8 +2,9 @@
 const securityHeaders = [
   {
     key: 'Content-Security-Policy',
-    value:
-      "default-src 'self'; img-src 'self' https: data:; object-src 'none';",
+    value: process.env.NODE_ENV === 'development' 
+      ? "default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self' data:; connect-src 'self' ws: wss:; object-src 'none';"
+      : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self' data:; connect-src 'self'; object-src 'none';",
   },
   {
     key: 'Referrer-Policy',
