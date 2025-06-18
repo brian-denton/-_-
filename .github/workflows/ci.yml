@@ -40,7 +40,7 @@ jobs:
 
       # Run Biome linting and formatting checks
       - name: Run Biome lint
-        run: npx @biomejs/biome check .
+        run: biome ci
 
       # Run TypeScript type checking
       - name: Type check
