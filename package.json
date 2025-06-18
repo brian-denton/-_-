@@ -53,9 +53,13 @@
 		"typescript": "^5"
 	},
 	"lint-staged": {
-		"*.{js,jsx,ts,tsx,json,css,md}": [
+		"*.{js,jsx,ts,tsx}": [
 			"npx @biomejs/biome check --write"
-		]
+		],
+		"*.{json}": [
+			"npx @biomejs/biome format --write"
+		],
+		"!package-lock.json": []
 	},
 	"pnpm": {
 		"overrides": {
