@@ -1,4 +1,59 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# DentonHub.com
+
+A Next.js application with comprehensive logging and monitoring.
+
+## Features
+
+- Next.js 15 with TypeScript
+- Tailwind CSS for styling
+- Drizzle ORM for database operations
+- Winston logging with Supabase integration
+- Biome for linting and formatting
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Run linting
+npm run lint:check
+
+# Fix linting issues
+npm run lint:fix
+```
+
+## Logging
+
+This application includes a comprehensive logging system that supports:
+
+- Multiple log levels (debug, info, warn, error)
+- Structured logging with metadata
+- File-based logging with rotation
+- Supabase integration for log storage
+- HTTP request logging
+- Error tracking
+
+## Database
+
+Uses Drizzle ORM with PostgreSQL:
+
+```bash
+# Generate migrations
+npm run db:generate
+
+# Push schema changes
+npm run db:push
+
+# Run migrations
+npm run db:migrate
+
+# Open Drizzle Studio
+npm run db:studio
+```
 
 ## Getting Started
 

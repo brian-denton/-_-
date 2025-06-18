@@ -56,10 +56,10 @@
 		"*.{js,jsx,ts,tsx}": [
 			"npx @biomejs/biome check --write"
 		],
-		"*.{json}": [
+		"*.json": [
 			"npx @biomejs/biome format --write"
 		],
-		"!package-lock.json": []
+		"package-lock.json": "echo 'Skipping package-lock.json (auto-generated)'"
 	},
 	"pnpm": {
 		"overrides": {
