@@ -1,28 +1,35 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "nursery": {
-        "useSortedClasses": {
-          "level": "warn",
-          "options": {
-            "attributes": [
-              "classList"
-            ],
-            "functions": [
-              "clsx",
-              "cva",
-              "tw",
-              "cn"
-            ]
-          }
-        }
-      }
-    }
-  }
+	"$schema": "https://biomejs.dev/schemas/1.6.4/schema.json",
+	"files": {
+		"ignore": [
+			"node_modules/**",
+			".next/**",
+			"dist/**",
+			"build/**",
+			"out/**",
+			"logs/**",
+			"drizzle/migrations/**",
+			"*.min.js",
+			"*.d.ts",
+			"coverage/**"
+		]
+	},
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"nursery": {
+				"useSortedClasses": {
+					"level": "warn",
+					"options": {
+						"attributes": ["classList"],
+						"functions": ["clsx", "cva", "tw", "cn"]
+					}
+				}
+			}
+		}
+	}
 }
