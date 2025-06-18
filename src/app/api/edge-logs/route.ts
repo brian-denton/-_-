@@ -5,9 +5,9 @@
  * to be processed by the main Winston logger with file and database transports.
  */
 
+import { type NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 import type { LogMetadata } from "@/lib/logger/types";
-import { type NextRequest, NextResponse } from "next/server";
 
 /**
  * Log entry interface for incoming edge logs

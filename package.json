@@ -7,12 +7,15 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
+		"lint:check": "npx @biomejs/biome ci",
+		"lint:fix": "npx @biomejs/biome check --write .",
 		"db:generate": "drizzle-kit generate",
 		"db:push": "drizzle-kit push",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
 		"logs:cleanup": "node -e \"console.log('Log cleanup functionality available via API endpoint')\"",
-		"logs:test": "node -e \"console.log('Test logging via the Logger Demo component on homepage')\""
+		"logs:test": "node -e \"console.log('Test logging via the Logger Demo component on homepage')\"",
+		"prepare": "husky"
 	},
 	"dependencies": {
 		"@radix-ui/react-avatar": "^1.0.4",
@@ -38,14 +41,21 @@
 		"winston-daily-rotate-file": "^5.0.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.8.2",
+		"@biomejs/biome": "2.0.0",
 		"@types/node": "^20",
 		"@types/react": "19.1.6",
 		"@types/react-dom": "19.1.6",
 		"@types/winston": "^2.4.4",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.1.2",
 		"postcss": "^8",
 		"tailwindcss": "^3.4.1",
 		"typescript": "^5"
+	},
+	"lint-staged": {
+		"*.{js,jsx,ts,tsx,json,css,md}": [
+			"npx @biomejs/biome check --write"
+		]
 	},
 	"pnpm": {
 		"overrides": {

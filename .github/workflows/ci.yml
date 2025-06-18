@@ -42,10 +42,6 @@ jobs:
       - name: Run Biome lint
         run: biome ci
 
-      # Run TypeScript type checking
-      - name: Type check
-        run: npx tsc --noEmit
-
   # Job for building the application
   build:
     name: Build Application

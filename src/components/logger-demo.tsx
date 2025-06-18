@@ -4,9 +4,9 @@
  */
 "use client";
 
+import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 
 type LogLevel = "error" | "warn" | "info" | "debug";
 
@@ -15,6 +15,8 @@ export function LoggerDemo() {
 	const [level, setLevel] = useState<LogLevel>("info");
 	const [loading, setLoading] = useState(false);
 	const [lastRequestId, setLastRequestId] = useState<string>("");
+	const logLevelId = useId();
+	const logMessageId = useId();
 
 	/**
 	 * Send a test log to the API
@@ -198,8 +200,14 @@ export function LoggerDemo() {
 
 				<div className="space-y-3">
 					<div>
-						<label className="mb-1 block font-medium text-sm">Log Level</label>
+						<label
+							htmlFor={logLevelId}
+							className="mb-1 block font-medium text-sm"
+						>
+							Log Level
+						</label>
 						<select
+							id={logLevelId}
 							value={level}
 							onChange={(e) => setLevel(e.target.value as LogLevel)}
 							className="w-full rounded-md border p-2"
@@ -212,8 +220,14 @@ export function LoggerDemo() {
 					</div>
 
 					<div>
-						<label className="mb-1 block font-medium text-sm">Message</label>
+						<label
+							htmlFor={logMessageId}
+							className="mb-1 block font-medium text-sm"
+						>
+							Message
+						</label>
 						<Input
+							id={logMessageId}
 							type="text"
 							value={message}
 							onChange={(e) => setMessage(e.target.value)}

@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 import { createSupabaseTransport } from "./supabase-transport";
-import type { LogMetadata, RequestContextMetadata } from "./types";
+import type { LogMetadata } from "./types";
 
 // Install uuid for request ID generation
 // npm install uuid @types/uuid
@@ -57,7 +57,7 @@ const fileFormat = winston.format.combine(
 /**
  * Database format - minimal since Supabase transport handles structuring
  */
-const databaseFormat = winston.format.combine(
+const _databaseFormat = winston.format.combine(
 	winston.format.timestamp(),
 	winston.format.errors({ stack: true }),
 );

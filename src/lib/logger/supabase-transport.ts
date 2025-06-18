@@ -1,10 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
 /**
  * Custom Winston transport for logging to Supabase database
  * Stores logs in PostgreSQL using Drizzle ORM with comprehensive metadata
  */
 import Transport from "winston-transport";
-import { type InsertLog, type LogLevel, db, logsTable } from "../db";
+import { db, type InsertLog, type LogLevel, logsTable } from "../db";
 
 interface SupabaseTransportOptions extends Transport.TransportStreamOptions {
 	tableName?: string;
