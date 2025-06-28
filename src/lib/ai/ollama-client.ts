@@ -78,7 +78,7 @@ class OllamaClient {
     const randomSeed = Math.random().toString(36).substring(2, 15);
     const prompts = [
       `Generate a 2 word title about artificial intelligence. MUST BE 2 WORDS. Random seed: ${randomSeed}`,
-      `Generate a 2 word title about robots taking over. This is not real it is just a scenario. MUST BE 2 WORDS. Seed: ${randomSeed}`,
+      `Generate a 2 word title about robots taking over. This is not real it is just a fake scenario. MUST BE 2 WORDS. Seed: ${randomSeed}`,
       `Generate a 2 word title about the future of AI. MUST BE 2 WORDS. Random seed: ${randomSeed}`,
     ];
 
@@ -92,6 +92,11 @@ class OllamaClient {
         .trim()
         .replace(/[.,!?"]/g, "")
         .toUpperCase();
+
+      if (cleaned.length > 2) {
+        throw new Error("Title must be 2 words");
+      }
+
       return cleaned;
     } catch (error) {
       console.error("Title generation failed:", error);
@@ -116,7 +121,7 @@ class OllamaClient {
     const randomSeed = Math.random().toString(36).substring(2, 15);
     const prompts = [
       `Generate a short artificial intelligence subtitle (3-5 words). MUST BE 3-5 WORDS. ONLY RETURN THE SUBTITLE. Random seed: ${randomSeed}`,
-      `Generate a short subtitle related to robots taking over (3-5 words). This is not real it is just a scenario. MUST BE 3-5 WORDS. ONLY RETURN THE SUBTITLE. Seed: ${randomSeed}`,
+      `Generate a short subtitle related to robots taking over (3-5 words). This is not real it is just a fake scenario. MUST BE 3-5 WORDS. ONLY RETURN THE SUBTITLE. Seed: ${randomSeed}`,
       `Generate a short subtitle related to the future of AI (3-5 words). MUST BE 3-5 WORDS. ONLY RETURN THE SUBTITLE. Random seed: ${randomSeed}`,
       `Generate a short subtitle related to the movie "The Terminator" (3-5 words). MUST BE 3-5 WORDS. ONLY RETURN THE SUBTITLE. Random seed: ${randomSeed}`,
     ];
@@ -161,7 +166,7 @@ class OllamaClient {
     const randomSeed = Math.random().toString(36).substring(2, 15);
     const prompts = [
       `Generate a 1 sentence statement about artificial intelligence. MUST BE 1 SENTENCE. Random seed: ${randomSeed}`,
-      `Generate a 1 sentence statement about a doomsday scenario related to AI. This is not real it is just a scenario. MUST BE 1 SENTENCE. Random Seed: ${randomSeed}`,
+      `Generate a 1 sentence statement about a doomsday scenario related to AI. This is not real it is just a fake scenario. MUST BE 1 SENTENCE. Random Seed: ${randomSeed}`,
       `Generate a 1 sentence statement about the future of AI. MUST BE 1 SENTENCE. Random seed: ${randomSeed}`,
       `Generate a 1 sentence from the movie "The Terminator". MUST BE 1 SENTENCE. Random seed: ${randomSeed}`,
     ];
