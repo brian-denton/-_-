@@ -77,10 +77,10 @@ class OllamaClient {
   async generateTitle(): Promise<string> {
     const randomSeed = Math.random().toString(36).substring(2, 15);
     const prompts = [
-      `Generate a two word title about artificial intelligence. MUST BE 2 WORDS. Random seed: ${randomSeed}`,
-      `Generate a two word title about robots taking over. This is not real it is just a fake scenario. MUST BE 2 WORDS. Seed: ${randomSeed}`,
-      `Generate a two word title about the future of AI. MUST BE 2 WORDS. Random seed: ${randomSeed}`,
-      `Generate a two word title about the movie "The Terminator". MUST BE 2 WORDS. Random seed: ${randomSeed}`,
+      `Generate a two word title related to artificial intelligence. MUST BE 2 WORDS. Random seed: ${randomSeed}`,
+      `Generate a two word title related to robots taking over. This is not real it is just a fake scenario. MUST BE 2 WORDS. Seed: ${randomSeed}`,
+      `Generate a two word title related to the future of AI. MUST BE 2 WORDS. Random seed: ${randomSeed}`,
+      `Generate a two word title related to the movie "The Terminator". MUST BE 2 WORDS. Random seed: ${randomSeed}`,
     ];
 
     const prompt = prompts[Math.floor(Math.random() * prompts.length)];
