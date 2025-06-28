@@ -1,9 +1,9 @@
 /**
- * AI-powered content generator for dynamic portfolio content
- * Uses Ollama with Qwen2:0.5b model to generate varied content
+ * AI-powered content generator using MobileBERT for intelligent portfolio content
+ * Analyzes user context and generates personalized content
  */
 
-import { ollamaClient } from "./ollama-client";
+import { mobileBERTClient } from "./mobilebert-client";
 
 export interface GeneratedContent {
 	heroTitle: string;
@@ -17,95 +17,82 @@ export interface GeneratedContent {
 	workingOn: string;
 	availability: "available" | "busy" | "selective";
 	theme: "professional" | "creative" | "technical" | "innovative";
-}
-
-export interface ContentPrompts {
-	heroTitle: string;
-	heroSubtitle: string;
-	heroDescription: string;
-	aboutDescription: string;
-	skillsFocus: string;
-	projectIdeas: string;
-	personalityTrait: string;
-	currentMood: string;
-	workingOn: string;
+	confidence: number;
+	aiGenerated: boolean;
 }
 
 class ContentGenerator {
-	private prompts: ContentPrompts = {
-		heroTitle: `Generate a creative, professional title for a full-stack developer's portfolio. Make it unique and engaging. Examples: "Code Architect & Digital Craftsman", "Full-Stack Innovator", "Creative Developer & Problem Solver". Return only the title, no quotes or extra text.`,
-		
-		heroSubtitle: `Generate a compelling subtitle for a developer portfolio that describes their expertise. Focus on modern technologies and impact. Examples: "Building scalable web applications with React & Node.js", "Crafting digital experiences that users love", "Transforming ideas into powerful software solutions". Return only the subtitle, no quotes.`,
-		
-		heroDescription: `Write a brief, engaging description (2-3 sentences) for a developer's hero section. Focus on passion, skills, and impact. Make it personal and professional. Return only the description, no quotes.`,
-		
-		aboutDescription: `Write a personal "About Me" description (3-4 sentences) for a full-stack developer. Include journey, passion, and what drives them. Make it authentic and engaging. Return only the description, no quotes.`,
-		
-		skillsFocus: `List 3-4 technical areas a full-stack developer might be focusing on currently. Examples: "AI Integration", "Performance Optimization", "Cloud Architecture", "Mobile Development", "DevOps", "UI/UX Design". Return as comma-separated list, no quotes.`,
-		
-		projectIdeas: `Generate 2-3 interesting project ideas a developer might be working on. Be creative but realistic. Examples: "AI-powered task manager", "Real-time collaboration platform", "Sustainable tech marketplace". Return as comma-separated list, no quotes.`,
-		
-		personalityTrait: `Generate a positive personality trait that would appeal to potential clients/employers. Examples: "detail-oriented", "innovative thinker", "collaborative leader", "problem solver", "creative visionary". Return only the trait, no quotes.`,
-		
-		currentMood: `Generate a current professional mood/state. Examples: "exploring new technologies", "optimizing for performance", "diving deep into AI", "building something amazing", "solving complex challenges". Return only the mood, no quotes.`,
-		
-		workingOn: `Generate what a developer might currently be working on. Be specific and interesting. Examples: "a machine learning recommendation engine", "optimizing database queries", "building a design system", "exploring WebAssembly". Return only the description, no quotes.`
-	};
-
 	/**
-	 * Generate all dynamic content for the portfolio
+	 * Generate all dynamic content for the portfolio using MobileBERT
 	 */
-	async generateContent(): Promise<GeneratedContent> {
+	async generateContent(userAgent?: string): Promise<GeneratedContent> {
 		try {
-			// Check if Ollama is available
-			const isAvailable = await ollamaClient.isAvailable();
+			// Check if MobileBERT is available
+			const isAvailable = await mobileBERTClient.isAvailable();
 			if (!isAvailable) {
-				console.warn("Ollama not available, using fallback content");
+				console.warn("MobileBERT not available, using fallback content");
 				return this.getFallbackContent();
 			}
 
-			// Generate all content pieces
-			const [
+			// Analyze user context
+			const timeOfDay = this.getTimeOfDay();
+			const dayOfWeek = this.getDayOfWeek();
+			const userAgentString = userAgent || "modern browser";
+
+			const personalityAnalysis = await mobileBERTClient.analyzeUserContext(
+				userAgentString,
+				timeOfDay,
+				dayOfWeek
+			);
+
+			// Generate content suggestions based on personality
+			const contentSuggestions = await mobileBERTClient.generateContentSuggestions(
+				personalityAnalysis.personality,
+				personalityAnalysis.traits
+			);
+
+			// Extract specific content pieces
+			const heroTitle = this.findSuggestion(contentSuggestions, "heroTitle")?.content || 
+				this.generateTitleForPersonality(personalityAnalysis.personality);
+
+			const heroDescription = this.findSuggestion(contentSuggestions, "heroDescription")?.content ||
+				this.generateDescriptionForPersonality(personalityAnalysis.personality);
+
+			// Generate subtitle based on personality
+			const heroSubtitle = this.generateSubtitle(personalityAnalysis.personality);
+
+			// Generate skills based on personality and context
+			const skillsFocus = await this.generateSkills(personalityAnalysis.personality);
+
+			// Generate other content
+			const aboutDescription = this.generateAboutDescription(personalityAnalysis.personality, personalityAnalysis.traits);
+			const projectIdeas = this.generateProjectIdeas(personalityAnalysis.personality);
+			const currentMood = this.generateCurrentMood(personalityAnalysis.personality);
+			const workingOn = this.generateWorkingOn(personalityAnalysis.personality);
+
+			// Determine theme using MobileBERT
+			const combinedContent = `${heroTitle} ${heroSubtitle} ${heroDescription}`;
+			const theme = await mobileBERTClient.classifyTheme(combinedContent) as GeneratedContent["theme"];
+
+			// Generate availability
+			const availability = this.generateAvailability();
+
+			return {
 				heroTitle,
 				heroSubtitle,
 				heroDescription,
 				aboutDescription,
 				skillsFocus,
 				projectIdeas,
-				personalityTrait,
+				personalityTrait: personalityAnalysis.traits[0],
 				currentMood,
-				workingOn
-			] = await Promise.all([
-				this.generateSingle("heroTitle"),
-				this.generateSingle("heroSubtitle"),
-				this.generateSingle("heroDescription"),
-				this.generateSingle("aboutDescription"),
-				this.generateSingle("skillsFocus"),
-				this.generateSingle("projectIdeas"),
-				this.generateSingle("personalityTrait"),
-				this.generateSingle("currentMood"),
-				this.generateSingle("workingOn")
-			]);
-
-			// Determine theme based on generated content
-			const theme = this.determineTheme(heroTitle, heroSubtitle, personalityTrait);
-			
-			// Determine availability randomly
-			const availability = this.getRandomAvailability();
-
-			return {
-				heroTitle: this.cleanText(heroTitle),
-				heroSubtitle: this.cleanText(heroSubtitle),
-				heroDescription: this.cleanText(heroDescription),
-				aboutDescription: this.cleanText(aboutDescription),
-				skillsFocus: this.parseList(skillsFocus),
-				projectIdeas: this.parseList(projectIdeas),
-				personalityTrait: this.cleanText(personalityTrait),
-				currentMood: this.cleanText(currentMood),
-				workingOn: this.cleanText(workingOn),
+				workingOn,
 				availability,
-				theme
+				theme,
+				confidence: personalityAnalysis.confidence,
+				aiGenerated: true
 			};
+
 		} catch (error) {
 			console.error("Content generation failed:", error);
 			return this.getFallbackContent();
@@ -113,68 +100,187 @@ class ContentGenerator {
 	}
 
 	/**
-	 * Generate a single piece of content
+	 * Generate skills based on personality
 	 */
-	private async generateSingle(type: keyof ContentPrompts): Promise<string> {
-		try {
-			const prompt = this.prompts[type];
-			const response = await ollamaClient.generate(prompt, {
-				temperature: 0.8,
-				top_p: 0.9,
-				num_predict: 100
-			});
-			return response;
-		} catch (error) {
-			console.error(`Failed to generate ${type}:`, error);
-			return this.getFallbackForType(type);
-		}
-	}
-
-	/**
-	 * Clean and format generated text
-	 */
-	private cleanText(text: string): string {
-		return text
-			.replace(/^["']|["']$/g, "") // Remove quotes
-			.replace(/\n+/g, " ") // Replace newlines with spaces
-			.trim();
-	}
-
-	/**
-	 * Parse comma-separated lists
-	 */
-	private parseList(text: string): string[] {
-		return text
-			.split(",")
-			.map(item => this.cleanText(item))
-			.filter(item => item.length > 0)
-			.slice(0, 4); // Limit to 4 items
-	}
-
-	/**
-	 * Determine theme based on generated content
-	 */
-	private determineTheme(title: string, subtitle: string, trait: string): GeneratedContent["theme"] {
-		const content = `${title} ${subtitle} ${trait}`.toLowerCase();
+	private async generateSkills(personality: string): Promise<string[]> {
+		const skillContext = `A ${personality} developer working with modern web technologies`;
 		
-		if (content.includes("creative") || content.includes("design") || content.includes("art")) {
-			return "creative";
+		try {
+			const skills = await mobileBERTClient.extractSkills(skillContext);
+			return skills;
+		} catch (error) {
+			console.error("Skills generation failed:", error);
+			return this.getDefaultSkills(personality);
 		}
-		if (content.includes("technical") || content.includes("engineer") || content.includes("architect")) {
-			return "technical";
-		}
-		if (content.includes("innovative") || content.includes("cutting-edge") || content.includes("future")) {
-			return "innovative";
-		}
-		return "professional";
 	}
 
 	/**
-	 * Get random availability status
+	 * Helper methods
 	 */
-	private getRandomAvailability(): GeneratedContent["availability"] {
+	private findSuggestion(suggestions: any[], type: string) {
+		return suggestions.find(s => s.type === type);
+	}
+
+	private generateTitleForPersonality(personality: string): string {
+		const titles: Record<string, string[]> = {
+			professional: [
+				"Senior Full-Stack Developer & Solutions Architect",
+				"Lead Developer & Technical Consultant", 
+				"Principal Engineer & Digital Strategist"
+			],
+			creative: [
+				"Creative Developer & Digital Design Craftsman",
+				"UI/UX Engineer & Visual Storyteller",
+				"Design-Focused Developer & Creative Technologist"
+			],
+			technical: [
+				"Technical Lead & Systems Architect",
+				"Engineering Manager & Performance Specialist",
+				"Backend Architect & Infrastructure Expert"
+			],
+			innovative: [
+				"Innovation Engineer & Future-Tech Builder",
+				"AI-Focused Developer & Technology Pioneer",
+				"Next-Gen Developer & Emerging Tech Specialist"
+			]
+		};
+
+		const options = titles[personality] || titles.professional;
+		return options[Math.floor(Math.random() * options.length)];
+	}
+
+	private generateDescriptionForPersonality(personality: string): string {
+		const descriptions: Record<string, string[]> = {
+			professional: [
+				"Building enterprise-grade applications with proven methodologies and industry best practices. Focused on delivering reliable, scalable solutions.",
+				"Transforming complex business requirements into robust digital solutions. Passionate about clean architecture and maintainable code.",
+				"Creating production-ready applications that drive business success. Expert in full-stack development and system design."
+			],
+			creative: [
+				"Crafting beautiful, intuitive digital experiences that blend artistic vision with technical excellence. Every pixel has purpose.",
+				"Designing and developing user-centered applications that delight and inspire. Where creativity meets cutting-edge technology.",
+				"Building visually stunning, highly interactive web experiences. Passionate about design systems and user experience."
+			],
+			technical: [
+				"Engineering high-performance applications with optimal algorithms and clean architecture. Deep expertise in system optimization.",
+				"Solving complex technical challenges through innovative engineering solutions. Focused on scalability and performance.",
+				"Building robust, efficient systems that handle scale. Expert in backend architecture and performance optimization."
+			],
+			innovative: [
+				"Exploring cutting-edge technologies to build the future of web development. Passionate about AI integration and emerging frameworks.",
+				"Pioneering next-generation web solutions with experimental technologies. Always pushing the boundaries of what's possible.",
+				"Creating tomorrow's applications today. Focused on AI, machine learning, and revolutionary web technologies."
+			]
+		};
+
+		const options = descriptions[personality] || descriptions.professional;
+		return options[Math.floor(Math.random() * options.length)];
+	}
+
+	private generateSubtitle(personality: string): string {
+		const subtitles: Record<string, string[]> = {
+			professional: [
+				"Building scalable web applications with modern technologies",
+				"Delivering enterprise solutions that drive business growth",
+				"Creating robust digital platforms for complex challenges"
+			],
+			creative: [
+				"Crafting beautiful, user-centered digital experiences",
+				"Designing and developing visually stunning applications",
+				"Blending creativity with cutting-edge web technology"
+			],
+			technical: [
+				"Engineering high-performance, scalable web systems",
+				"Architecting robust backend solutions and APIs",
+				"Optimizing applications for speed and reliability"
+			],
+			innovative: [
+				"Exploring AI-powered web development solutions",
+				"Building next-generation applications with emerging tech",
+				"Pioneering the future of interactive web experiences"
+			]
+		};
+
+		const options = subtitles[personality] || subtitles.professional;
+		return options[Math.floor(Math.random() * options.length)];
+	}
+
+	private generateAboutDescription(personality: string, traits: string[]): string {
+		const templates: Record<string, string> = {
+			professional: `My journey in development has been driven by a commitment to excellence and reliability. As a ${traits.join(', ')} developer, I focus on building solutions that not only meet requirements but exceed expectations. I believe in the power of well-architected systems and clean, maintainable code.`,
+			creative: `I started as a designer who fell in love with code, and that unique perspective shapes everything I build. Being ${traits.join(', ')}, I approach development as both an art and a science. My goal is to create digital experiences that are not just functional, but truly inspiring.`,
+			technical: `My passion lies in solving complex technical challenges through elegant engineering solutions. As a ${traits.join(', ')} developer, I thrive on optimizing performance, designing scalable architectures, and diving deep into the technical details that make great software possible.`,
+			innovative: `I'm constantly exploring the cutting edge of web development, always looking for ways to push boundaries and create something new. Being ${traits.join(', ')}, I love experimenting with emerging technologies and finding innovative solutions to traditional problems.`
+		};
+
+		return templates[personality] || templates.professional;
+	}
+
+	private generateProjectIdeas(personality: string): string[] {
+		const projects: Record<string, string[]> = {
+			professional: [
+				"Enterprise dashboard with real-time analytics",
+				"Scalable e-commerce platform with microservices",
+				"Business process automation tool"
+			],
+			creative: [
+				"Interactive portfolio with 3D animations",
+				"Creative coding playground and showcase",
+				"Design system documentation platform"
+			],
+			technical: [
+				"High-performance API gateway",
+				"Distributed caching optimization system",
+				"Real-time monitoring and alerting platform"
+			],
+			innovative: [
+				"AI-powered content generation platform",
+				"Machine learning recommendation engine",
+				"Blockchain-based decentralized application"
+			]
+		};
+
+		return projects[personality] || projects.professional;
+	}
+
+	private generateCurrentMood(personality: string): string {
+		const moods: Record<string, string[]> = {
+			professional: ["optimizing business processes", "delivering reliable solutions", "building scalable systems"],
+			creative: ["exploring design possibilities", "crafting beautiful interfaces", "experimenting with animations"],
+			technical: ["solving complex algorithms", "optimizing performance", "architecting robust systems"],
+			innovative: ["exploring AI integration", "experimenting with new frameworks", "building future-ready solutions"]
+		};
+
+		const options = moods[personality] || moods.professional;
+		return options[Math.floor(Math.random() * options.length)];
+	}
+
+	private generateWorkingOn(personality: string): string {
+		const projects: Record<string, string[]> = {
+			professional: ["a comprehensive business analytics platform", "enterprise-grade API infrastructure", "scalable microservices architecture"],
+			creative: ["an immersive 3D web experience", "a revolutionary design system", "interactive data visualization tools"],
+			technical: ["a high-performance caching layer", "distributed system optimization", "advanced monitoring solutions"],
+			innovative: ["an AI-powered development assistant", "next-generation web framework", "machine learning integration platform"]
+		};
+
+		const options = projects[personality] || projects.professional;
+		return options[Math.floor(Math.random() * options.length)];
+	}
+
+	private getDefaultSkills(personality: string): string[] {
+		const skills: Record<string, string[]> = {
+			professional: ["React", "TypeScript", "Node.js", "PostgreSQL", "AWS", "Docker"],
+			creative: ["React", "Next.js", "Tailwind CSS", "Figma", "Three.js", "Framer Motion"],
+			technical: ["Node.js", "Python", "PostgreSQL", "Redis", "Kubernetes", "GraphQL"],
+			innovative: ["React", "TypeScript", "AI/ML", "WebAssembly", "Blockchain", "Edge Computing"]
+		};
+
+		return skills[personality] || skills.professional;
+	}
+
+	private generateAvailability(): GeneratedContent["availability"] {
 		const options: GeneratedContent["availability"][] = ["available", "busy", "selective"];
-		const weights = [0.6, 0.2, 0.2]; // 60% available, 20% busy, 20% selective
+		const weights = [0.6, 0.2, 0.2];
 		
 		const random = Math.random();
 		let cumulative = 0;
@@ -189,6 +295,20 @@ class ContentGenerator {
 		return "available";
 	}
 
+	private getTimeOfDay(): string {
+		const hour = new Date().getHours();
+		if (hour < 6) return "early morning";
+		if (hour < 12) return "morning";
+		if (hour < 17) return "afternoon";
+		if (hour < 21) return "evening";
+		return "night";
+	}
+
+	private getDayOfWeek(): string {
+		const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+		return days[new Date().getDay()];
+	}
+
 	/**
 	 * Fallback content when AI is not available
 	 */
@@ -199,49 +319,34 @@ class ContentGenerator {
 				heroSubtitle: "Building scalable web applications with modern technologies",
 				heroDescription: "Passionate about creating exceptional digital experiences through clean code and thoughtful design. I transform complex problems into elegant solutions.",
 				aboutDescription: "My journey in development started with curiosity and evolved into a passion for building products that make a difference. I believe great software comes from understanding both the technical and human sides of problems.",
-				skillsFocus: ["React & Next.js", "Node.js & Python", "Cloud Architecture", "AI Integration"],
+				skillsFocus: ["React", "Next.js", "TypeScript", "Node.js", "PostgreSQL", "AWS"],
 				projectIdeas: ["AI-powered analytics dashboard", "Real-time collaboration platform", "Sustainable tech marketplace"],
 				personalityTrait: "innovative problem solver",
 				currentMood: "exploring cutting-edge technologies",
 				workingOn: "a machine learning recommendation system",
 				availability: "available" as const,
-				theme: "professional" as const
+				theme: "professional" as const,
+				confidence: 0.8,
+				aiGenerated: false
 			},
 			{
 				heroTitle: "Creative Developer & Code Craftsman",
 				heroSubtitle: "Crafting beautiful, performant web experiences",
 				heroDescription: "I blend creativity with technical expertise to build applications that users love. Every line of code is written with purpose and passion.",
 				aboutDescription: "From design to deployment, I enjoy every aspect of the development process. My background in both design and engineering helps me create products that are both beautiful and functional.",
-				skillsFocus: ["UI/UX Design", "Performance Optimization", "TypeScript", "Design Systems"],
+				skillsFocus: ["React", "TypeScript", "Tailwind CSS", "Figma", "Three.js", "Framer Motion"],
 				projectIdeas: ["Interactive design portfolio", "Performance monitoring tool", "Creative coding playground"],
 				personalityTrait: "detail-oriented creative",
 				currentMood: "perfecting user experiences",
 				workingOn: "an innovative design system framework",
 				availability: "selective" as const,
-				theme: "creative" as const
+				theme: "creative" as const,
+				confidence: 0.8,
+				aiGenerated: false
 			}
 		];
 
 		return fallbacks[Math.floor(Math.random() * fallbacks.length)];
-	}
-
-	/**
-	 * Get fallback for specific content type
-	 */
-	private getFallbackForType(type: keyof ContentPrompts): string {
-		const fallbacks = {
-			heroTitle: "Full-Stack Developer & Problem Solver",
-			heroSubtitle: "Building exceptional web applications with modern technologies",
-			heroDescription: "Passionate about creating digital solutions that make a difference.",
-			aboutDescription: "I love turning complex problems into elegant solutions through code.",
-			skillsFocus: "React, Node.js, TypeScript, Cloud Computing",
-			projectIdeas: "AI-powered web app, Real-time dashboard, Mobile-first platform",
-			personalityTrait: "innovative thinker",
-			currentMood: "building something amazing",
-			workingOn: "a next-generation web application"
-		};
-
-		return fallbacks[type];
 	}
 }
 

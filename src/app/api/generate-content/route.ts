@@ -1,25 +1,31 @@
 /**
- * API route for generating dynamic portfolio content
- * Uses Ollama with Qwen2:0.5b model for content generation
+ * API route for generating dynamic portfolio content using MobileBERT
+ * Analyzes user context and generates personalized content
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { contentGenerator } from "@/lib/ai/content-generator";
 import { logger } from "@/lib/logger";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
 	try {
-		logger.info("Generating dynamic portfolio content");
+		logger.info("Generating dynamic portfolio content with MobileBERT");
+
+		// Extract user agent for context analysis
+		const userAgent = request.headers.get("user-agent") || "unknown";
 
 		const startTime = Date.now();
-		const content = await contentGenerator.generateContent();
+		const content = await contentGenerator.generateContent(userAgent);
 		const generationTime = Date.now() - startTime;
 
 		logger.info("Content generation completed", {
 			generationTime: `${generationTime}ms`,
 			theme: content.theme,
 			availability: content.availability,
-			aiGenerated: true
+			aiGenerated: content.aiGenerated,
+			confidence: content.confidence,
+			personalityTrait: content.personalityTrait,
+			userAgent: userAgent.substring(0, 100) // Log first 100 chars for privacy
 		});
 
 		return NextResponse.json({
@@ -28,8 +34,10 @@ export async function GET() {
 			metadata: {
 				generatedAt: new Date().toISOString(),
 				generationTime,
-				model: "qwen2:0.5b",
-				version: "1.0.0"
+				model: "MobileBERT + Hugging Face",
+				version: "2.0.0",
+				aiGenerated: content.aiGenerated,
+				confidence: content.confidence
 			}
 		});
 	} catch (error) {
@@ -49,7 +57,19 @@ export async function GET() {
 	}
 }
 
-export async function POST() {
-	// Allow manual content regeneration
-	return GET();
+export async function POST(request: NextRequest) {
+	// Allow manual content regeneration with custom parameters
+	try {
+		const body = await request.json();
+		const { userAgent, forceRegenerate } = body;
+
+		if (forceRegenerate) {
+			logger.info("Manual content regeneration requested");
+		}
+
+		return GET(request);
+	} catch {
+		// If body parsing fails, fall back to GET
+		return GET(request);
+	}
 }

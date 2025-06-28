@@ -1,5 +1,5 @@
 /**
- * React hook for managing dynamic AI-generated content
+ * React hook for managing dynamic AI-generated content with MobileBERT
  * Fetches and caches content, handles loading states
  */
 
@@ -14,6 +14,8 @@ interface ContentResponse {
 		generationTime: number;
 		model: string;
 		version: string;
+		aiGenerated: boolean;
+		confidence: number;
 	};
 }
 
@@ -31,16 +33,23 @@ export function useDynamicContent(): UseDynamicContentReturn {
 	const [error, setError] = useState<string | null>(null);
 	const [metadata, setMetadata] = useState<ContentResponse["metadata"] | null>(null);
 
-	const fetchContent = async () => {
+	const fetchContent = async (forceRegenerate = false) => {
 		try {
 			setIsLoading(true);
 			setError(null);
 
+			const method = forceRegenerate ? "POST" : "GET";
+			const body = forceRegenerate ? JSON.stringify({ 
+				forceRegenerate: true,
+				userAgent: navigator.userAgent 
+			}) : undefined;
+
 			const response = await fetch("/api/generate-content", {
-				method: "GET",
+				method,
 				headers: {
 					"Content-Type": "application/json",
 				},
+				...(body && { body })
 			});
 
 			if (!response.ok) {
@@ -62,7 +71,7 @@ export function useDynamicContent(): UseDynamicContentReturn {
 				metadata: data.metadata,
 				cachedAt: Date.now()
 			};
-			localStorage.setItem("portfolio-content", JSON.stringify(cacheData));
+			localStorage.setItem("portfolio-content-mobilebert", JSON.stringify(cacheData));
 
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : "Unknown error";
@@ -83,7 +92,7 @@ export function useDynamicContent(): UseDynamicContentReturn {
 
 	const loadFromCache = () => {
 		try {
-			const cached = localStorage.getItem("portfolio-content");
+			const cached = localStorage.getItem("portfolio-content-mobilebert");
 			if (!cached) return null;
 
 			const data = JSON.parse(cached);
@@ -96,7 +105,7 @@ export function useDynamicContent(): UseDynamicContentReturn {
 			}
 
 			// Cache is too old, remove it
-			localStorage.removeItem("portfolio-content");
+			localStorage.removeItem("portfolio-content-mobilebert");
 			return null;
 		} catch {
 			return null;
@@ -105,8 +114,8 @@ export function useDynamicContent(): UseDynamicContentReturn {
 
 	const regenerate = async () => {
 		// Clear cache before regenerating
-		localStorage.removeItem("portfolio-content");
-		await fetchContent();
+		localStorage.removeItem("portfolio-content-mobilebert");
+		await fetchContent(true);
 	};
 
 	useEffect(() => {

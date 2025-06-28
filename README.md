@@ -1,39 +1,34 @@
-# AI-Powered Dynamic Portfolio
+# AI-Powered Dynamic Portfolio with MobileBERT
 
-A Next.js portfolio website that changes every time you visit it, powered by **Ollama** and **Qwen2:0.5b** model for dynamic content generation.
+A Next.js portfolio website that intelligently adapts to each visitor using **MobileBERT** and **Hugging Face's Inference API** for personalized content generation.
 
 ## 🤖 AI Features
 
-- **Dynamic Content Generation**: Hero section, about text, and focus areas change on every visit
-- **Intelligent Theming**: AI determines the visual theme based on generated content
-- **Personality-Driven**: Content adapts to different professional personalities
-- **Local AI Processing**: Uses Ollama for privacy-focused, local content generation
+- **Intelligent Content Adaptation**: Uses MobileBERT to analyze user context and generate personalized content
+- **Context-Aware Personalization**: Adapts based on user agent, time of day, and browsing patterns
+- **Smart Theme Selection**: AI determines the optimal visual theme based on generated content
+- **Personality-Driven Content**: Content adapts to different professional personalities (creative, technical, innovative, professional)
+- **Real-time Classification**: Uses zero-shot classification for dynamic content categorization
 
 ## 🚀 Tech Stack
 
 - **Frontend**: Next.js 15, React 19, TypeScript
 - **Styling**: Tailwind CSS, shadcn/ui components
-- **AI**: Ollama + Qwen2:0.5b model
+- **AI**: MobileBERT via Hugging Face Inference API
 - **Database**: Supabase PostgreSQL with Drizzle ORM
 - **Logging**: Winston with comprehensive monitoring
 
 ## 📋 Prerequisites
 
 1. **Node.js 18+** installed
-2. **Ollama** installed and running locally
-3. **Qwen2:0.5b model** pulled in Ollama
+2. **Hugging Face API Key** (free tier available)
+3. **Supabase account** (optional, for logging)
 
-### Setting up Ollama
+### Setting up Hugging Face
 
-1. Install Ollama from [https://ollama.ai](https://ollama.ai)
-2. Pull the Qwen2:0.5b model:
-   ```bash
-   ollama pull qwen2:0.5b
-   ```
-3. Verify the model is available:
-   ```bash
-   ollama list
-   ```
+1. Create account at [https://huggingface.co](https://huggingface.co)
+2. Generate API key at [https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
+3. Add to your environment variables
 
 ## 🛠 Installation
 
@@ -51,9 +46,8 @@ A Next.js portfolio website that changes every time you visit it, powered by **O
    
    Configure your environment variables:
    ```env
-   # Ollama Configuration
-   OLLAMA_BASE_URL=http://localhost:11434
-   OLLAMA_MODEL=qwen2:0.5b
+   # Hugging Face Configuration
+   HUGGINGFACE_API_KEY=your-huggingface-api-key
    
    # Supabase (optional, for logging)
    NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
@@ -68,55 +62,46 @@ A Next.js portfolio website that changes every time you visit it, powered by **O
 
 ## 🎯 How It Works
 
-### Content Generation Flow
+### AI-Powered Content Generation Flow
 
-1. **Page Load**: When someone visits the portfolio, the `useDynamicContent` hook triggers
-2. **AI Generation**: The system calls `/api/generate-content` which uses Ollama to generate:
+1. **Context Analysis**: When someone visits the portfolio, MobileBERT analyzes:
+   - User agent (browser/device information)
+   - Time of day and day of week
+   - Previous interaction patterns
+
+2. **Personality Classification**: The system uses zero-shot classification to determine the optimal personality:
+   - **Professional**: Corporate-focused, reliable, business-oriented
+   - **Creative**: Design-focused, artistic, visually-driven
+   - **Technical**: Engineering-focused, performance-oriented
+   - **Innovative**: Cutting-edge, experimental, future-focused
+
+3. **Content Generation**: Based on the determined personality, the system generates:
    - Hero title and subtitle
-   - Personal description
-   - Current focus areas
-   - Project ideas
-   - Professional mood/status
-3. **Theme Detection**: AI analyzes the generated content to determine the visual theme
-4. **Caching**: Content is cached for 30 minutes to balance freshness with performance
-5. **Fallback**: If Ollama is unavailable, the system uses curated fallback content
+   - Personal description and about section
+   - Current focus areas and skills
+   - Project ideas and current work
+   - Professional mood and availability status
 
-### AI Prompts
+4. **Theme Selection**: AI analyzes the generated content to determine the visual theme
+5. **Caching**: Content is cached for 30 minutes to balance freshness with performance
 
-The system uses carefully crafted prompts for different content types:
+### MobileBERT Models Used
 
-- **Hero Content**: Professional titles and descriptions
-- **About Section**: Personal journey and current focus
-- **Skills**: Dynamic skill highlighting based on trends
-- **Projects**: Creative project ideas and current work
-- **Personality**: Professional traits and working style
-
-### Dynamic Theming
-
-Based on the AI-generated content, the site automatically applies one of four themes:
-
-- **Professional**: Clean, corporate aesthetic
-- **Creative**: Colorful, design-focused styling  
-- **Technical**: Engineering-focused, precise design
-- **Innovative**: Future-forward, cutting-edge appearance
+- **Zero-Shot Classification**: `facebook/bart-large-mnli` for personality and theme classification
+- **Question Answering**: `distilbert-base-cased-distilled-squad` for content extraction
+- **Text Classification**: `google/mobilebert-uncased` for content analysis
 
 ## 🔧 Configuration
 
-### Ollama Settings
+### AI Model Settings
 
-Customize AI generation in `src/lib/ai/ollama-client.ts`:
+Customize AI behavior in `src/lib/ai/mobilebert-client.ts`:
 
 ```typescript
-const request: OllamaRequest = {
-  model: this.model,
-  prompt,
-  stream: false,
-  options: {
-    temperature: 0.8,    // Creativity level (0-1)
-    top_p: 0.9,         // Nucleus sampling
-    num_predict: 200,   // Max tokens to generate
-  },
-};
+// Models can be changed to other Hugging Face models
+this.classificationModel = "google/mobilebert-uncased";
+this.qaModel = "distilbert-base-cased-distilled-squad";
+this.zeroShotModel = "facebook/bart-large-mnli";
 ```
 
 ### Content Caching
@@ -127,27 +112,44 @@ Adjust cache duration in `src/hooks/use-dynamic-content.ts`:
 const maxAge = 30 * 60 * 1000; // 30 minutes
 ```
 
-## 📊 Monitoring & Logging
+### Personality Weights
+
+Modify personality selection probability in `src/lib/ai/content-generator.ts`:
+
+```typescript
+// Adjust these weights to favor certain personalities
+const personalities = [
+  "professional and corporate focused",    // 25%
+  "creative and design oriented",          // 25%
+  "technical and engineering focused",     // 25%
+  "innovative and cutting-edge"           // 25%
+];
+```
+
+## 📊 Monitoring & Analytics
 
 The application includes comprehensive logging:
 
-- **AI Generation Metrics**: Response times, model performance
-- **Content Analytics**: Theme distribution, generation success rates
-- **Error Tracking**: Fallback usage, API failures
-- **User Experience**: Cache hit rates, loading times
-
-View logs in the browser console or check the database if Supabase is configured.
+- **AI Performance Metrics**: Response times, confidence scores, model performance
+- **Content Analytics**: Personality distribution, theme selection patterns
+- **User Context**: Anonymized user agent analysis, timing patterns
+- **Error Tracking**: Fallback usage, API failures, generation errors
 
 ## 🎨 Customization
 
-### Adding New Content Types
+### Adding New Personalities
 
-1. **Define prompts** in `src/lib/ai/content-generator.ts`
-2. **Update the interface** in the same file
-3. **Modify the generation logic** to include your new content
-4. **Update components** to display the new content
+1. **Update personality list** in `src/lib/ai/mobilebert-client.ts`
+2. **Add content templates** in `src/lib/ai/content-generator.ts`
+3. **Define visual themes** in `src/components/dynamic-hero-section.tsx`
 
-### Custom Themes
+### Custom Content Types
+
+1. **Define new content types** in the `GeneratedContent` interface
+2. **Add generation logic** in `ContentGenerator` class
+3. **Update UI components** to display new content
+
+### Theme Customization
 
 Add new themes in `src/components/dynamic-hero-section.tsx`:
 
@@ -158,85 +160,62 @@ const themeStyles = {
 };
 ```
 
-### Fallback Content
-
-Customize fallback content in `src/lib/ai/content-generator.ts` for when AI is unavailable.
-
 ## 🚀 Deployment
 
 ### Production Considerations
 
-1. **Ollama Setup**: Ensure Ollama is running on your production server
-2. **Model Availability**: Verify Qwen2:0.5b is pulled and accessible
-3. **Environment Variables**: Set production URLs and API keys
-4. **Caching Strategy**: Consider Redis for distributed caching
-5. **Monitoring**: Set up alerts for AI generation failures
+1. **Hugging Face API Limits**: Monitor usage and upgrade plan if needed
+2. **Caching Strategy**: Consider Redis for distributed caching
+3. **Error Handling**: Ensure robust fallbacks for API failures
+4. **Performance**: Monitor AI response times and optimize accordingly
 
-### Docker Deployment
+### Environment Variables
 
-Example `docker-compose.yml`:
+Set these in your production environment:
 
-```yaml
-version: '3.8'
-services:
-  portfolio:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - OLLAMA_BASE_URL=http://ollama:11434
-    depends_on:
-      - ollama
-  
-  ollama:
-    image: ollama/ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    command: ["ollama", "serve"]
-
-volumes:
-  ollama_data:
+```env
+HUGGINGFACE_API_KEY=your-production-api-key
+NODE_ENV=production
+# ... other production variables
 ```
 
 ## 🔍 Troubleshooting
 
 ### Common Issues
 
-**Ollama Connection Failed**:
-- Verify Ollama is running: `ollama list`
-- Check the base URL in environment variables
-- Ensure firewall allows connections to port 11434
+**Hugging Face API Errors**:
+- Verify API key is correct and active
+- Check rate limits and usage quotas
+- Ensure models are accessible (some require approval)
 
-**Model Not Found**:
-- Pull the model: `ollama pull qwen2:0.5b`
-- Verify model name matches configuration
-
-**Slow Generation**:
-- Reduce `num_predict` in Ollama settings
-- Consider using a smaller model for faster responses
+**Slow Content Generation**:
+- Consider using smaller/faster models
 - Implement request queuing for high traffic
+- Optimize caching strategy
 
 **Content Not Updating**:
 - Clear browser localStorage
 - Check cache expiration settings
-- Verify API endpoint is accessible
+- Verify API endpoint accessibility
+
+**Fallback Content Always Showing**:
+- Check Hugging Face API connectivity
+- Verify API key permissions
+- Review error logs for specific issues
 
 ## 📈 Performance
 
-- **Generation Time**: Typically 1-3 seconds with Qwen2:0.5b
+- **Generation Time**: Typically 1-3 seconds with MobileBERT
 - **Cache Hit Rate**: ~90% for repeat visitors within 30 minutes
-- **Fallback Usage**: <5% when Ollama is properly configured
+- **Fallback Usage**: <5% when Hugging Face API is properly configured
 - **Bundle Size**: Optimized with Next.js automatic code splitting
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Test with different AI-generated content
-5. Submit a pull request
+3. Test with different AI-generated content scenarios
+4. Submit a pull request
 
 ## 📄 License
 
@@ -244,7 +223,17 @@ MIT License - see LICENSE file for details.
 
 ## 🙏 Acknowledgments
 
-- **Ollama** for local AI inference
-- **Qwen2** model by Alibaba Cloud
+- **Hugging Face** for providing excellent AI models and APIs
+- **MobileBERT** team at Google for the efficient BERT model
 - **shadcn/ui** for beautiful components
 - **Next.js** team for the amazing framework
+
+## 🔮 Future Enhancements
+
+- [ ] Multi-language content generation
+- [ ] A/B testing for different personalities
+- [ ] Real-time content optimization based on user engagement
+- [ ] Integration with analytics for content performance tracking
+- [ ] Custom model fine-tuning for domain-specific content
+- [ ] Voice-based content generation
+- [ ] Image generation for dynamic visual content

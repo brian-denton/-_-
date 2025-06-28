@@ -1,11 +1,11 @@
 /**
- * Dynamic Hero Section with AI-generated content
- * Changes on every visit using Ollama + Qwen2:0.5b
+ * Dynamic Hero Section with MobileBERT-generated content
+ * Analyzes user context and adapts content accordingly
  */
 
 "use client";
 
-import { ArrowRight, Download, Github, Linkedin, Mail, RefreshCw, Sparkles } from "lucide-react";
+import { ArrowRight, Download, Github, Linkedin, Mail, RefreshCw, Brain, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,15 +68,21 @@ export function DynamicHeroSection() {
 			{/* Background Pattern */}
 			<div className="absolute inset-0 bg-grid-pattern opacity-5" />
 			
-			{/* AI Generation Indicator */}
-			{metadata && (
-				<div className="absolute top-20 right-4 z-20">
+			{/* AI Generation Indicators */}
+			<div className="absolute top-20 right-4 z-20 space-y-2">
+				{metadata && (
 					<Badge variant="outline" className="bg-background/80 backdrop-blur-sm">
-						<Sparkles className="mr-1 h-3 w-3" />
-						AI Generated
+						<Brain className="mr-1 h-3 w-3" />
+						MobileBERT
 					</Badge>
-				</div>
-			)}
+				)}
+				{metadata?.confidence && (
+					<Badge variant="outline" className="bg-background/80 backdrop-blur-sm block">
+						<TrendingUp className="mr-1 h-3 w-3" />
+						{Math.round(metadata.confidence * 100)}% confidence
+					</Badge>
+				)}
+			</div>
 
 			{/* Content */}
 			<div className="container mx-auto px-4 py-20 text-center relative z-10">
@@ -92,6 +98,15 @@ export function DynamicHeroSection() {
 							</Badge>
 						)}
 					</div>
+
+					{/* Personality Trait */}
+					{!isLoading && content?.personalityTrait && (
+						<div className="flex justify-center">
+							<Badge variant="outline" className="px-3 py-1 text-xs bg-background/50">
+								{content.personalityTrait}
+							</Badge>
+						</div>
+					)}
 
 					{/* Main Heading */}
 					<div className="space-y-4">
@@ -175,10 +190,15 @@ export function DynamicHeroSection() {
 
 					{/* Generation Info */}
 					{metadata && !isLoading && (
-						<div className="pt-8 text-xs text-muted-foreground">
+						<div className="pt-8 text-xs text-muted-foreground space-y-1">
 							<p>
-								Generated with Qwen2:0.5b • {metadata.generationTime}ms • {new Date(metadata.generatedAt).toLocaleTimeString()}
+								Generated with {metadata.model} • {metadata.generationTime}ms • {new Date(metadata.generatedAt).toLocaleTimeString()}
 							</p>
+							{metadata.aiGenerated && (
+								<p>
+									AI-powered personalization based on your context
+								</p>
+							)}
 						</div>
 					)}
 				</div>
