@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "lint:check": "npx @biomejs/biome ci",
-    "lint:fix": "npx @biomejs/biome check --write .",
+    "lint:check": "npx lint ci",
+    "lint:fix": "npx lint check --write .",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:migrate": "drizzle-kit migrate",
@@ -42,7 +42,7 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.0.0",
+    "lint": "2.0.0",
     "@types/node": "^20",
     "@types/react": "19.1.6",
     "@types/react-dom": "19.1.6",
@@ -57,10 +57,10 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "npx @biomejs/biome check --write"
+      "npx lint check --write"
     ],
     "*.json": [
-      "npx @biomejs/biome format --write"
+      "npx lint format --write"
     ],
     "package-lock.json": "echo 'Skipping package-lock.json (auto-generated)'"
   },
