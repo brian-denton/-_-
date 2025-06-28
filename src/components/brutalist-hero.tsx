@@ -158,7 +158,7 @@ export function BrutalistHero() {
         <div className="mb-8">
           {isLoading ? (
             <div className="space-y-4">
-              <h1 className="text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter text-white font-mono">
+              <h1 className="text-2xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter text-white font-mono">
                 {glitchText}
               </h1>
               <div className="text-2xl md:text-4xl font-bold text-red-500 font-mono animate-pulse">
