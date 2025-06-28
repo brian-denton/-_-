@@ -6,19 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "lint:check": "npx lint ci",
-    "lint:fix": "npx lint check --write .",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "logs:cleanup": "node -e \"console.log('Log cleanup functionality available via API endpoint')\"",
-    "logs:test": "node -e \"console.log('Test logging via the Logger Demo component on homepage')\"",
-    "prepare": "husky"
+    "logs:test": "node -e \"console.log('Test logging via the Logger Demo component on homepage')\""
   },
   "dependencies": {
-    "@huggingface/inference": "^4.1.0",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
     "@radix-ui/react-navigation-menu": "^1.1.4",
@@ -42,27 +37,15 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
-    "lint": "2.0.0",
     "@types/node": "^20",
     "@types/react": "19.1.6",
     "@types/react-dom": "19.1.6",
     "@types/winston": "^2.4.4",
     "eslint": "9.30.0",
     "eslint-config-next": "15.3.4",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "npx lint check --write"
-    ],
-    "*.json": [
-      "npx lint format --write"
-    ],
-    "package-lock.json": "echo 'Skipping package-lock.json (auto-generated)'"
   },
   "pnpm": {
     "overrides": {
