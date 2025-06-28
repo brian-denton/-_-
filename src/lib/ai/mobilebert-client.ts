@@ -1,6 +1,6 @@
 /**
- * MobileBERT client using Hugging Face Inference API
- * Provides intelligent content classification and generation for portfolio
+ * MobileBERT client for brutalist content generation
+ * Specialized for generating chaotic, bold, and aggressive content
  */
 
 import { HfInference } from "@huggingface/inference";
@@ -36,18 +36,18 @@ class MobileBERTClient {
 	}
 
 	/**
-	 * Analyze user context to determine portfolio personality
+	 * Analyze user context for brutalist personality determination
 	 */
-	async analyzeUserContext(userAgent: string, timeOfDay: string, dayOfWeek: string): Promise<PersonalityAnalysis> {
-		const contextText = `User visiting portfolio: ${userAgent} at ${timeOfDay} on ${dayOfWeek}`;
+	async analyzeBrutalistContext(userAgent: string, timeOfDay: string, dayOfWeek: string): Promise<PersonalityAnalysis> {
+		const contextText = `User visiting brutalist site: ${userAgent} at ${timeOfDay} on ${dayOfWeek}`;
 		
 		const personalities = [
-			"professional and corporate focused",
-			"creative and design oriented", 
-			"technical and engineering focused",
-			"innovative and cutting-edge",
-			"collaborative and team oriented",
-			"analytical and data driven"
+			"brutal and uncompromising",
+			"chaotic and random", 
+			"aggressive and bold",
+			"raw and minimalist",
+			"confrontational and direct",
+			"geometric and structured"
 		];
 
 		try {
@@ -62,34 +62,34 @@ class MobileBERTClient {
 			const topPersonality = response.labels[0];
 			const confidence = response.scores[0];
 
-			// Extract traits based on personality
-			const traits = this.getTraitsForPersonality(topPersonality);
+			// Extract traits based on brutalist personality
+			const traits = this.getBrutalistTraits(topPersonality);
 
 			return {
-				personality: topPersonality.split(' ')[0], // Get first word (professional, creative, etc.)
+				personality: topPersonality.split(' ')[0], // Get first word (brutal, chaotic, etc.)
 				confidence,
 				traits
 			};
 		} catch (error) {
-			console.error("Context analysis error:", error);
+			console.error("Brutalist context analysis error:", error);
 			return {
-				personality: "professional",
+				personality: "brutal",
 				confidence: 0.5,
-				traits: ["reliable", "experienced", "skilled"]
+				traits: ["uncompromising", "bold", "raw"]
 			};
 		}
 	}
 
 	/**
-	 * Generate content suggestions based on personality and context
+	 * Generate brutalist content suggestions
 	 */
-	async generateContentSuggestions(personality: string, traits: string[]): Promise<ContentSuggestion[]> {
+	async generateBrutalistContent(personality: string, traits: string[]): Promise<ContentSuggestion[]> {
 		const suggestions: ContentSuggestion[] = [];
 
 		try {
-			// Generate hero title suggestions
-			const titleContext = `A ${personality} developer with traits: ${traits.join(', ')}. They are skilled in modern web development.`;
-			const titleQuestion = "What would be a compelling professional title for this developer?";
+			// Generate brutalist title suggestions
+			const titleContext = `A ${personality} brutalist designer with traits: ${traits.join(', ')}. They create bold, uncompromising digital experiences.`;
+			const titleQuestion = "What would be a powerful, aggressive title for this brutalist creator?";
 			
 			const titleSuggestion = await this.hf.questionAnswering({
 				model: this.qaModel,
@@ -101,13 +101,13 @@ class MobileBERTClient {
 
 			suggestions.push({
 				type: "heroTitle",
-				content: this.enhanceTitle(titleSuggestion.answer, personality),
+				content: this.enhanceBrutalistTitle(titleSuggestion.answer, personality),
 				confidence: titleSuggestion.score
 			});
 
-			// Generate description suggestions
-			const descContext = `A ${personality} developer who is ${traits.join(', ')}. They build modern web applications.`;
-			const descQuestion = "What motivates this developer and what do they focus on?";
+			// Generate brutalist description suggestions
+			const descContext = `A ${personality} brutalist who is ${traits.join(', ')}. They create raw, uncompromising digital experiences.`;
+			const descQuestion = "What drives this brutalist creator and what do they believe in?";
 			
 			const descSuggestion = await this.hf.questionAnswering({
 				model: this.qaModel,
@@ -119,28 +119,27 @@ class MobileBERTClient {
 
 			suggestions.push({
 				type: "heroDescription",
-				content: this.enhanceDescription(descSuggestion.answer, personality),
+				content: this.enhanceBrutalistDescription(descSuggestion.answer, personality),
 				confidence: descSuggestion.score
 			});
 
 		} catch (error) {
-			console.error("Content generation error:", error);
-			// Return fallback suggestions
-			return this.getFallbackSuggestions(personality);
+			console.error("Brutalist content generation error:", error);
+			return this.getFallbackBrutalistSuggestions(personality);
 		}
 
 		return suggestions;
 	}
 
 	/**
-	 * Classify content theme based on generated text
+	 * Classify brutalist theme based on generated content
 	 */
-	async classifyTheme(content: string): Promise<string> {
+	async classifyBrutalistTheme(content: string): Promise<string> {
 		const themes = [
-			"professional and business oriented",
-			"creative and artistic",
-			"technical and engineering focused", 
-			"innovative and futuristic"
+			"brutal and uncompromising",
+			"chaotic and random",
+			"aggressive and confrontational", 
+			"raw and minimalist"
 		];
 
 		try {
@@ -154,17 +153,17 @@ class MobileBERTClient {
 
 			return response.labels[0].split(' ')[0]; // Return first word
 		} catch (error) {
-			console.error("Theme classification error:", error);
-			return "professional";
+			console.error("Brutalist theme classification error:", error);
+			return "brutal";
 		}
 	}
 
 	/**
-	 * Extract skills and technologies from context
+	 * Extract brutalist skills and technologies
 	 */
-	async extractSkills(context: string): Promise<string[]> {
-		const skillsContext = `${context}. Modern web development technologies and frameworks.`;
-		const skillsQuestion = "What technologies and skills are most relevant?";
+	async extractBrutalistSkills(context: string): Promise<string[]> {
+		const skillsContext = `${context}. Brutalist design principles and bold technologies.`;
+		const skillsQuestion = "What skills and approaches are most relevant for brutalist design?";
 
 		try {
 			const response = await this.hf.questionAnswering({
@@ -175,11 +174,11 @@ class MobileBERTClient {
 				}
 			});
 
-			// Parse and enhance the skills
-			return this.parseSkills(response.answer);
+			// Parse and enhance the skills for brutalist context
+			return this.parseBrutalistSkills(response.answer);
 		} catch (error) {
-			console.error("Skills extraction error:", error);
-			return ["React", "TypeScript", "Node.js", "Next.js"];
+			console.error("Brutalist skills extraction error:", error);
+			return ["BRUTALISM", "BOLD DESIGN", "RAW CSS", "TYPOGRAPHY"];
 		}
 	}
 
@@ -210,101 +209,102 @@ class MobileBERTClient {
 			qaModel: this.qaModel,
 			zeroShotModel: this.zeroShotModel,
 			provider: "Hugging Face",
-			type: "BERT-based models for classification and QA"
+			type: "BERT-based models for brutalist content generation"
 		};
 	}
 
-	// Helper methods
+	// Helper methods for brutalist content
 
-	private getTraitsForPersonality(personality: string): string[] {
+	private getBrutalistTraits(personality: string): string[] {
 		const traitMap: Record<string, string[]> = {
-			professional: ["reliable", "experienced", "detail-oriented", "results-driven"],
-			creative: ["innovative", "artistic", "visionary", "design-focused"],
-			technical: ["analytical", "systematic", "problem-solving", "engineering-minded"],
-			innovative: ["forward-thinking", "cutting-edge", "experimental", "pioneering"],
-			collaborative: ["team-oriented", "communicative", "supportive", "inclusive"],
-			analytical: ["data-driven", "logical", "methodical", "research-oriented"]
+			brutal: ["uncompromising", "raw", "bold", "functional"],
+			chaotic: ["random", "unpredictable", "entropy-driven", "disorder-loving"],
+			aggressive: ["confrontational", "loud", "direct", "unsubtle"],
+			raw: ["minimalist", "stripped-down", "essential", "honest"],
+			confrontational: ["challenging", "provocative", "bold", "direct"],
+			geometric: ["structured", "angular", "precise", "mathematical"]
 		};
 
 		const key = personality.split(' ')[0].toLowerCase();
-		return traitMap[key] || traitMap.professional;
+		return traitMap[key] || traitMap.brutal;
 	}
 
-	private enhanceTitle(baseTitle: string, personality: string): string {
+	private enhanceBrutalistTitle(baseTitle: string, personality: string): string {
 		const enhancements: Record<string, string[]> = {
-			professional: ["Senior", "Lead", "Principal", "Expert"],
-			creative: ["Creative", "Innovative", "Visionary", "Design-Focused"],
-			technical: ["Technical", "Engineering", "Systems", "Architecture"],
-			innovative: ["Next-Gen", "Cutting-Edge", "Future-Forward", "Advanced"]
+			brutal: ["CONCRETE", "RAW", "UNCOMPROMISING", "BRUTAL"],
+			chaotic: ["CHAOS", "RANDOM", "ENTROPY", "DISORDER"],
+			aggressive: ["AGGRESSIVE", "BOLD", "LOUD", "CONFRONTATIONAL"],
+			raw: ["MINIMAL", "STRIPPED", "ESSENTIAL", "PURE"]
 		};
 
-		const prefixes = enhancements[personality] || enhancements.professional;
+		const prefixes = enhancements[personality] || enhancements.brutal;
 		const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
 		
-		return `${prefix} Full-Stack Developer & Digital Craftsman`;
+		return `${prefix} DIGITAL`;
 	}
 
-	private enhanceDescription(baseDesc: string, personality: string): string {
+	private enhanceBrutalistDescription(baseDesc: string, personality: string): string {
 		const templates: Record<string, string> = {
-			professional: "Building robust, scalable applications with proven methodologies and industry best practices. Focused on delivering reliable solutions that drive business success.",
-			creative: "Crafting beautiful, intuitive digital experiences that blend artistic vision with technical excellence. Passionate about design systems and user-centered development.",
-			technical: "Engineering high-performance applications with clean architecture and optimal algorithms. Deep expertise in system design and technical problem-solving.",
-			innovative: "Exploring cutting-edge technologies to build the future of web development. Passionate about AI integration, emerging frameworks, and next-generation solutions."
+			brutal: "Raw, uncompromising digital brutalism. Bold statements through aggressive design. No decoration, only function and power.",
+			chaotic: "Embracing chaos as creative force. Random generation meets intentional design. Beautiful disorder through algorithmic creativity.",
+			aggressive: "Confrontational design that demands attention. Loud, bold, and unapologetically direct. Aggressive aesthetics for digital rebels.",
+			raw: "Stripped to essentials. Minimal but powerful. Raw beauty through functional design and honest materials."
 		};
 
-		return templates[personality] || templates.professional;
+		return templates[personality] || templates.brutal;
 	}
 
-	private parseSkills(skillsText: string): string[] {
-		const commonSkills = [
-			"React", "Next.js", "TypeScript", "JavaScript", "Node.js", "Python",
-			"PostgreSQL", "MongoDB", "AWS", "Docker", "Kubernetes", "GraphQL",
-			"Tailwind CSS", "Figma", "Git", "CI/CD", "Microservices", "API Design"
+	private parseBrutalistSkills(skillsText: string): string[] {
+		const brutalistSkills = [
+			"BRUTALISM", "CONCRETE", "RAW CSS", "BOLD TYPOGRAPHY", "GEOMETRIC FORMS",
+			"STARK CONTRAST", "FUNCTIONAL DESIGN", "AGGRESSIVE AESTHETICS", "MINIMAL",
+			"UNCOMPROMISING", "DIRECT", "CONFRONTATIONAL", "CHAOS", "RANDOMNESS",
+			"ENTROPY", "DISORDER", "ALGORITHMIC", "GENERATION", "BOLD COLORS"
 		];
 
 		// Extract mentioned skills from the text
-		const mentionedSkills = commonSkills.filter(skill => 
+		const mentionedSkills = brutalistSkills.filter(skill => 
 			skillsText.toLowerCase().includes(skill.toLowerCase())
 		);
 
-		// If no skills found, return a default set
+		// If no skills found, return a default brutalist set
 		if (mentionedSkills.length === 0) {
-			return ["React", "TypeScript", "Node.js", "Next.js"];
+			return ["BRUTALISM", "BOLD DESIGN", "RAW CSS", "CHAOS"];
 		}
 
 		// Return up to 6 skills
 		return mentionedSkills.slice(0, 6);
 	}
 
-	private getFallbackSuggestions(personality: string): ContentSuggestion[] {
+	private getFallbackBrutalistSuggestions(personality: string): ContentSuggestion[] {
 		const fallbacks: Record<string, ContentSuggestion[]> = {
-			professional: [
+			brutal: [
 				{
 					type: "heroTitle",
-					content: "Senior Full-Stack Developer & Solutions Architect",
+					content: "CONCRETE DIGITAL",
 					confidence: 0.8
 				},
 				{
 					type: "heroDescription", 
-					content: "Building enterprise-grade applications with proven methodologies and industry best practices.",
+					content: "Raw, uncompromising digital brutalism. Bold statements through aggressive design.",
 					confidence: 0.8
 				}
 			],
-			creative: [
+			chaotic: [
 				{
 					type: "heroTitle",
-					content: "Creative Developer & Digital Design Craftsman",
+					content: "CHAOS ENGINE",
 					confidence: 0.8
 				},
 				{
 					type: "heroDescription",
-					content: "Crafting beautiful, intuitive digital experiences that blend artistic vision with technical excellence.",
+					content: "Embracing chaos as creative force. Random generation meets intentional design.",
 					confidence: 0.8
 				}
 			]
 		};
 
-		return fallbacks[personality] || fallbacks.professional;
+		return fallbacks[personality] || fallbacks.brutal;
 	}
 }
 

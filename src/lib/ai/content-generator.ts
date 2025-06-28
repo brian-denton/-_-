@@ -1,6 +1,6 @@
 /**
- * AI-powered content generator using MobileBERT for intelligent portfolio content
- * Analyzes user context and generates personalized content
+ * AI-powered content generator using MobileBERT for brutalist landing page
+ * Generates random, chaotic content with brutalist themes
  */
 
 import { mobileBERTClient } from "./mobilebert-client";
@@ -16,14 +16,14 @@ export interface GeneratedContent {
 	currentMood: string;
 	workingOn: string;
 	availability: "available" | "busy" | "selective";
-	theme: "professional" | "creative" | "technical" | "innovative";
+	theme: "brutal" | "chaos" | "random" | "aggressive";
 	confidence: number;
 	aiGenerated: boolean;
 }
 
 class ContentGenerator {
 	/**
-	 * Generate all dynamic content for the portfolio using MobileBERT
+	 * Generate all dynamic content for the brutalist landing page using MobileBERT
 	 */
 	async generateContent(userAgent?: string): Promise<GeneratedContent> {
 		try {
@@ -34,45 +34,41 @@ class ContentGenerator {
 				return this.getFallbackContent();
 			}
 
-			// Analyze user context
+			// Analyze user context for brutalist themes
 			const timeOfDay = this.getTimeOfDay();
 			const dayOfWeek = this.getDayOfWeek();
-			const userAgentString = userAgent || "modern browser";
+			const userAgentString = userAgent || "unknown browser";
 
-			const personalityAnalysis = await mobileBERTClient.analyzeUserContext(
+			// Generate brutalist personality analysis
+			const personalityAnalysis = await mobileBERTClient.analyzeBrutalistContext(
 				userAgentString,
 				timeOfDay,
 				dayOfWeek
 			);
 
-			// Generate content suggestions based on personality
-			const contentSuggestions = await mobileBERTClient.generateContentSuggestions(
+			// Generate chaotic content suggestions
+			const contentSuggestions = await mobileBERTClient.generateBrutalistContent(
 				personalityAnalysis.personality,
 				personalityAnalysis.traits
 			);
 
-			// Extract specific content pieces
-			const heroTitle = this.findSuggestion(contentSuggestions, "heroTitle")?.content || 
-				this.generateTitleForPersonality(personalityAnalysis.personality);
+			// Extract specific content pieces with brutalist themes
+			const heroTitle = this.generateBrutalistTitle(personalityAnalysis.personality);
+			const heroSubtitle = this.generateBrutalistSubtitle(personalityAnalysis.personality);
+			const heroDescription = this.generateBrutalistDescription(personalityAnalysis.personality);
 
-			const heroDescription = this.findSuggestion(contentSuggestions, "heroDescription")?.content ||
-				this.generateDescriptionForPersonality(personalityAnalysis.personality);
-
-			// Generate subtitle based on personality
-			const heroSubtitle = this.generateSubtitle(personalityAnalysis.personality);
-
-			// Generate skills based on personality and context
-			const skillsFocus = await this.generateSkills(personalityAnalysis.personality);
+			// Generate skills with brutalist/tech focus
+			const skillsFocus = await this.generateBrutalistSkills(personalityAnalysis.personality);
 
 			// Generate other content
-			const aboutDescription = this.generateAboutDescription(personalityAnalysis.personality, personalityAnalysis.traits);
-			const projectIdeas = this.generateProjectIdeas(personalityAnalysis.personality);
-			const currentMood = this.generateCurrentMood(personalityAnalysis.personality);
-			const workingOn = this.generateWorkingOn(personalityAnalysis.personality);
+			const aboutDescription = this.generateBrutalistAbout(personalityAnalysis.personality, personalityAnalysis.traits);
+			const projectIdeas = this.generateBrutalistProjects(personalityAnalysis.personality);
+			const currentMood = this.generateBrutalistMood(personalityAnalysis.personality);
+			const workingOn = this.generateBrutalistWork(personalityAnalysis.personality);
 
 			// Determine theme using MobileBERT
 			const combinedContent = `${heroTitle} ${heroSubtitle} ${heroDescription}`;
-			const theme = await mobileBERTClient.classifyTheme(combinedContent) as GeneratedContent["theme"];
+			const theme = await mobileBERTClient.classifyBrutalistTheme(combinedContent) as GeneratedContent["theme"];
 
 			// Generate availability
 			const availability = this.generateAvailability();
@@ -100,187 +96,195 @@ class ContentGenerator {
 	}
 
 	/**
-	 * Generate skills based on personality
+	 * Generate brutalist skills
 	 */
-	private async generateSkills(personality: string): Promise<string[]> {
-		const skillContext = `A ${personality} developer working with modern web technologies`;
+	private async generateBrutalistSkills(personality: string): Promise<string[]> {
+		const skillContext = `A ${personality} brutalist designer working with bold, aggressive technologies`;
 		
 		try {
-			const skills = await mobileBERTClient.extractSkills(skillContext);
+			const skills = await mobileBERTClient.extractBrutalistSkills(skillContext);
 			return skills;
 		} catch (error) {
 			console.error("Skills generation failed:", error);
-			return this.getDefaultSkills(personality);
+			return this.getDefaultBrutalistSkills(personality);
 		}
 	}
 
 	/**
-	 * Helper methods
+	 * Generate brutalist titles
 	 */
-	private findSuggestion(suggestions: any[], type: string) {
-		return suggestions.find(s => s.type === type);
-	}
-
-	private generateTitleForPersonality(personality: string): string {
+	private generateBrutalistTitle(personality: string): string {
 		const titles: Record<string, string[]> = {
-			professional: [
-				"Senior Full-Stack Developer & Solutions Architect",
-				"Lead Developer & Technical Consultant", 
-				"Principal Engineer & Digital Strategist"
+			brutal: [
+				"CONCRETE DIGITAL",
+				"RAW CODE MACHINE",
+				"BRUTAL INTERFACE",
+				"AGGRESSIVE DESIGN",
+				"UNCOMPROMISING TECH"
 			],
-			creative: [
-				"Creative Developer & Digital Design Craftsman",
-				"UI/UX Engineer & Visual Storyteller",
-				"Design-Focused Developer & Creative Technologist"
+			chaos: [
+				"RANDOM GENERATOR",
+				"CHAOS ENGINE",
+				"DISORDER MACHINE",
+				"ENTROPY CREATOR",
+				"UNPREDICTABLE AI"
 			],
-			technical: [
-				"Technical Lead & Systems Architect",
-				"Engineering Manager & Performance Specialist",
-				"Backend Architect & Infrastructure Expert"
+			random: [
+				"ALGORITHMIC CHAOS",
+				"DIGITAL ANARCHY",
+				"RANDOM BRUTALISM",
+				"CHAOTIC GENERATOR",
+				"UNPREDICTABLE FORCE"
 			],
-			innovative: [
-				"Innovation Engineer & Future-Tech Builder",
-				"AI-Focused Developer & Technology Pioneer",
-				"Next-Gen Developer & Emerging Tech Specialist"
+			aggressive: [
+				"BOLD STATEMENT",
+				"AGGRESSIVE INTERFACE",
+				"UNSUBTLE DESIGN",
+				"LOUD DIGITAL",
+				"CONFRONTATIONAL CODE"
 			]
 		};
 
-		const options = titles[personality] || titles.professional;
+		const options = titles[personality] || titles.brutal;
 		return options[Math.floor(Math.random() * options.length)];
 	}
 
-	private generateDescriptionForPersonality(personality: string): string {
-		const descriptions: Record<string, string[]> = {
-			professional: [
-				"Building enterprise-grade applications with proven methodologies and industry best practices. Focused on delivering reliable, scalable solutions.",
-				"Transforming complex business requirements into robust digital solutions. Passionate about clean architecture and maintainable code.",
-				"Creating production-ready applications that drive business success. Expert in full-stack development and system design."
-			],
-			creative: [
-				"Crafting beautiful, intuitive digital experiences that blend artistic vision with technical excellence. Every pixel has purpose.",
-				"Designing and developing user-centered applications that delight and inspire. Where creativity meets cutting-edge technology.",
-				"Building visually stunning, highly interactive web experiences. Passionate about design systems and user experience."
-			],
-			technical: [
-				"Engineering high-performance applications with optimal algorithms and clean architecture. Deep expertise in system optimization.",
-				"Solving complex technical challenges through innovative engineering solutions. Focused on scalability and performance.",
-				"Building robust, efficient systems that handle scale. Expert in backend architecture and performance optimization."
-			],
-			innovative: [
-				"Exploring cutting-edge technologies to build the future of web development. Passionate about AI integration and emerging frameworks.",
-				"Pioneering next-generation web solutions with experimental technologies. Always pushing the boundaries of what's possible.",
-				"Creating tomorrow's applications today. Focused on AI, machine learning, and revolutionary web technologies."
-			]
-		};
-
-		const options = descriptions[personality] || descriptions.professional;
-		return options[Math.floor(Math.random() * options.length)];
-	}
-
-	private generateSubtitle(personality: string): string {
+	private generateBrutalistSubtitle(personality: string): string {
 		const subtitles: Record<string, string[]> = {
-			professional: [
-				"Building scalable web applications with modern technologies",
-				"Delivering enterprise solutions that drive business growth",
-				"Creating robust digital platforms for complex challenges"
+			brutal: [
+				"Raw, unfiltered digital experience",
+				"Concrete meets code in brutal harmony",
+				"Uncompromising design philosophy",
+				"Bold statements through brutal aesthetics"
 			],
-			creative: [
-				"Crafting beautiful, user-centered digital experiences",
-				"Designing and developing visually stunning applications",
-				"Blending creativity with cutting-edge web technology"
+			chaos: [
+				"Embracing digital disorder and randomness",
+				"Controlled chaos through algorithmic generation",
+				"Beautiful destruction of design conventions",
+				"Random patterns creating unexpected beauty"
 			],
-			technical: [
-				"Engineering high-performance, scalable web systems",
-				"Architecting robust backend solutions and APIs",
-				"Optimizing applications for speed and reliability"
+			random: [
+				"Every visit generates new possibilities",
+				"Algorithmic randomness meets brutal design",
+				"Unpredictable content, consistent boldness",
+				"Random generation with purposeful chaos"
 			],
-			innovative: [
-				"Exploring AI-powered web development solutions",
-				"Building next-generation applications with emerging tech",
-				"Pioneering the future of interactive web experiences"
+			aggressive: [
+				"Loud, bold, and unapologetically direct",
+				"Confrontational design that demands attention",
+				"Aggressive aesthetics for digital rebels",
+				"Unsubtle beauty in computational aggression"
 			]
 		};
 
-		const options = subtitles[personality] || subtitles.professional;
+		const options = subtitles[personality] || subtitles.brutal;
 		return options[Math.floor(Math.random() * options.length)];
 	}
 
-	private generateAboutDescription(personality: string, traits: string[]): string {
+	private generateBrutalistDescription(personality: string): string {
+		const descriptions: Record<string, string[]> = {
+			brutal: [
+				"This is brutalism applied to digital space. Raw, uncompromising, and boldly functional. Every element serves a purpose, stripped of unnecessary decoration.",
+				"Concrete aesthetics meet digital innovation. Bold typography, stark contrasts, and geometric forms create an uncompromising user experience.",
+				"Brutalist design philosophy translated into code. Functional beauty through aggressive simplicity and unsubtle visual hierarchy."
+			],
+			chaos: [
+				"Controlled chaos through algorithmic generation. Every element is randomly created yet purposefully designed to create beautiful disorder.",
+				"Embracing randomness as a design principle. Chaotic generation creates unexpected patterns and serendipitous digital experiences.",
+				"Digital entropy as aesthetic choice. Random generation meets intentional design to create controlled beautiful chaos."
+			],
+			random: [
+				"Pure algorithmic creativity. Every visit generates new content, new layouts, new experiences. Randomness becomes the ultimate design tool.",
+				"Computational creativity unleashed. Random generation creates infinite possibilities within brutalist design constraints.",
+				"Algorithmic art meets functional design. Random content generation within structured brutalist aesthetic principles."
+			],
+			aggressive: [
+				"Uncompromising digital aggression. Bold colors, sharp edges, and confrontational typography create an intense user experience.",
+				"Aggressive aesthetics for the digital age. Loud, bold, and unapologetically direct in every design decision.",
+				"Confrontational design that refuses to be ignored. Aggressive visual hierarchy demands attention and engagement."
+			]
+		};
+
+		const options = descriptions[personality] || descriptions.brutal;
+		return options[Math.floor(Math.random() * options.length)];
+	}
+
+	private generateBrutalistAbout(personality: string, traits: string[]): string {
 		const templates: Record<string, string> = {
-			professional: `My journey in development has been driven by a commitment to excellence and reliability. As a ${traits.join(', ')} developer, I focus on building solutions that not only meet requirements but exceed expectations. I believe in the power of well-architected systems and clean, maintainable code.`,
-			creative: `I started as a designer who fell in love with code, and that unique perspective shapes everything I build. Being ${traits.join(', ')}, I approach development as both an art and a science. My goal is to create digital experiences that are not just functional, but truly inspiring.`,
-			technical: `My passion lies in solving complex technical challenges through elegant engineering solutions. As a ${traits.join(', ')} developer, I thrive on optimizing performance, designing scalable architectures, and diving deep into the technical details that make great software possible.`,
-			innovative: `I'm constantly exploring the cutting edge of web development, always looking for ways to push boundaries and create something new. Being ${traits.join(', ')}, I love experimenting with emerging technologies and finding innovative solutions to traditional problems.`
+			brutal: `I am a digital brutalist, committed to raw, uncompromising design. As a ${traits.join(', ')} creator, I believe in the power of bold statements and functional beauty. No decoration for decoration's sake.`,
+			chaos: `I embrace chaos as a creative force. Being ${traits.join(', ')}, I find beauty in randomness and order in disorder. Every creation is an experiment in controlled entropy.`,
+			random: `I am an algorithmic artist, using randomness as my primary tool. As a ${traits.join(', ')} generator, I create infinite possibilities through computational creativity and structured chaos.`,
+			aggressive: `I create confrontational digital experiences. Being ${traits.join(', ')}, I believe design should be bold, loud, and unapologetically direct. Subtlety is overrated.`
 		};
 
-		return templates[personality] || templates.professional;
+		return templates[personality] || templates.brutal;
 	}
 
-	private generateProjectIdeas(personality: string): string[] {
+	private generateBrutalistProjects(personality: string): string[] {
 		const projects: Record<string, string[]> = {
-			professional: [
-				"Enterprise dashboard with real-time analytics",
-				"Scalable e-commerce platform with microservices",
-				"Business process automation tool"
+			brutal: [
+				"Concrete UI Framework",
+				"Raw Typography System",
+				"Brutalist Component Library"
 			],
-			creative: [
-				"Interactive portfolio with 3D animations",
-				"Creative coding playground and showcase",
-				"Design system documentation platform"
+			chaos: [
+				"Random Layout Generator",
+				"Chaos Design System",
+				"Entropy-Based Interface"
 			],
-			technical: [
-				"High-performance API gateway",
-				"Distributed caching optimization system",
-				"Real-time monitoring and alerting platform"
+			random: [
+				"Algorithmic Art Platform",
+				"Random Content Engine",
+				"Generative Design Tool"
 			],
-			innovative: [
-				"AI-powered content generation platform",
-				"Machine learning recommendation engine",
-				"Blockchain-based decentralized application"
+			aggressive: [
+				"Confrontational Interface",
+				"Aggressive Typography Engine",
+				"Bold Statement Generator"
 			]
 		};
 
-		return projects[personality] || projects.professional;
+		return projects[personality] || projects.brutal;
 	}
 
-	private generateCurrentMood(personality: string): string {
+	private generateBrutalistMood(personality: string): string {
 		const moods: Record<string, string[]> = {
-			professional: ["optimizing business processes", "delivering reliable solutions", "building scalable systems"],
-			creative: ["exploring design possibilities", "crafting beautiful interfaces", "experimenting with animations"],
-			technical: ["solving complex algorithms", "optimizing performance", "architecting robust systems"],
-			innovative: ["exploring AI integration", "experimenting with new frameworks", "building future-ready solutions"]
+			brutal: ["creating uncompromising interfaces", "building raw digital experiences", "designing without compromise"],
+			chaos: ["embracing beautiful disorder", "generating controlled chaos", "creating random beauty"],
+			random: ["exploring algorithmic creativity", "generating infinite possibilities", "creating computational art"],
+			aggressive: ["making bold statements", "designing confrontational experiences", "creating aggressive aesthetics"]
 		};
 
-		const options = moods[personality] || moods.professional;
+		const options = moods[personality] || moods.brutal;
 		return options[Math.floor(Math.random() * options.length)];
 	}
 
-	private generateWorkingOn(personality: string): string {
+	private generateBrutalistWork(personality: string): string {
 		const projects: Record<string, string[]> = {
-			professional: ["a comprehensive business analytics platform", "enterprise-grade API infrastructure", "scalable microservices architecture"],
-			creative: ["an immersive 3D web experience", "a revolutionary design system", "interactive data visualization tools"],
-			technical: ["a high-performance caching layer", "distributed system optimization", "advanced monitoring solutions"],
-			innovative: ["an AI-powered development assistant", "next-generation web framework", "machine learning integration platform"]
+			brutal: ["a concrete digital manifesto", "raw interface architecture", "uncompromising design system"],
+			chaos: ["a beautiful chaos generator", "controlled entropy platform", "random beauty engine"],
+			random: ["an algorithmic art installation", "computational creativity tool", "infinite possibility generator"],
+			aggressive: ["a confrontational digital experience", "aggressive aesthetic framework", "bold statement platform"]
 		};
 
-		const options = projects[personality] || projects.professional;
+		const options = projects[personality] || projects.brutal;
 		return options[Math.floor(Math.random() * options.length)];
 	}
 
-	private getDefaultSkills(personality: string): string[] {
+	private getDefaultBrutalistSkills(personality: string): string[] {
 		const skills: Record<string, string[]> = {
-			professional: ["React", "TypeScript", "Node.js", "PostgreSQL", "AWS", "Docker"],
-			creative: ["React", "Next.js", "Tailwind CSS", "Figma", "Three.js", "Framer Motion"],
-			technical: ["Node.js", "Python", "PostgreSQL", "Redis", "Kubernetes", "GraphQL"],
-			innovative: ["React", "TypeScript", "AI/ML", "WebAssembly", "Blockchain", "Edge Computing"]
+			brutal: ["CONCRETE", "RAW CSS", "BOLD TYPOGRAPHY", "GEOMETRIC FORMS", "STARK CONTRAST", "FUNCTIONAL BEAUTY"],
+			chaos: ["RANDOMNESS", "ENTROPY", "DISORDER", "CHAOS THEORY", "ALGORITHMIC ART", "CONTROLLED CHAOS"],
+			random: ["ALGORITHMS", "GENERATION", "PROBABILITY", "RANDOMIZATION", "COMPUTATIONAL ART", "INFINITE LOOPS"],
+			aggressive: ["BOLD COLORS", "SHARP EDGES", "LOUD DESIGN", "CONFRONTATION", "UNSUBTLE", "AGGRESSIVE TYPOGRAPHY"]
 		};
 
-		return skills[personality] || skills.professional;
+		return skills[personality] || skills.brutal;
 	}
 
 	private generateAvailability(): GeneratedContent["availability"] {
 		const options: GeneratedContent["availability"][] = ["available", "busy", "selective"];
-		const weights = [0.6, 0.2, 0.2];
+		const weights = [0.4, 0.3, 0.3];
 		
 		const random = Math.random();
 		let cumulative = 0;
@@ -315,32 +319,32 @@ class ContentGenerator {
 	private getFallbackContent(): GeneratedContent {
 		const fallbacks = [
 			{
-				heroTitle: "Full-Stack Developer & Digital Innovator",
-				heroSubtitle: "Building scalable web applications with modern technologies",
-				heroDescription: "Passionate about creating exceptional digital experiences through clean code and thoughtful design. I transform complex problems into elegant solutions.",
-				aboutDescription: "My journey in development started with curiosity and evolved into a passion for building products that make a difference. I believe great software comes from understanding both the technical and human sides of problems.",
-				skillsFocus: ["React", "Next.js", "TypeScript", "Node.js", "PostgreSQL", "AWS"],
-				projectIdeas: ["AI-powered analytics dashboard", "Real-time collaboration platform", "Sustainable tech marketplace"],
-				personalityTrait: "innovative problem solver",
-				currentMood: "exploring cutting-edge technologies",
-				workingOn: "a machine learning recommendation system",
+				heroTitle: "BRUTAL DIGITAL",
+				heroSubtitle: "Raw, uncompromising design meets algorithmic chaos",
+				heroDescription: "This is brutalism for the digital age. Bold, uncompromising, and randomly generated. Every visit creates new chaos within structured design principles.",
+				aboutDescription: "I am a digital brutalist, embracing chaos as a creative force. Raw aesthetics meet computational creativity to create uncompromising digital experiences.",
+				skillsFocus: ["BRUTALISM", "CHAOS", "RANDOMNESS", "BOLD DESIGN", "RAW CSS", "AGGRESSIVE TYPOGRAPHY"],
+				projectIdeas: ["Chaos Generator", "Brutal Interface", "Random Beauty Engine"],
+				personalityTrait: "uncompromising brutalist",
+				currentMood: "creating digital chaos",
+				workingOn: "a brutal randomness engine",
 				availability: "available" as const,
-				theme: "professional" as const,
+				theme: "brutal" as const,
 				confidence: 0.8,
 				aiGenerated: false
 			},
 			{
-				heroTitle: "Creative Developer & Code Craftsman",
-				heroSubtitle: "Crafting beautiful, performant web experiences",
-				heroDescription: "I blend creativity with technical expertise to build applications that users love. Every line of code is written with purpose and passion.",
-				aboutDescription: "From design to deployment, I enjoy every aspect of the development process. My background in both design and engineering helps me create products that are both beautiful and functional.",
-				skillsFocus: ["React", "TypeScript", "Tailwind CSS", "Figma", "Three.js", "Framer Motion"],
-				projectIdeas: ["Interactive design portfolio", "Performance monitoring tool", "Creative coding playground"],
-				personalityTrait: "detail-oriented creative",
-				currentMood: "perfecting user experiences",
-				workingOn: "an innovative design system framework",
+				heroTitle: "CHAOS ENGINE",
+				heroSubtitle: "Algorithmic randomness meets brutal aesthetics",
+				heroDescription: "Pure computational creativity. Random generation creates infinite possibilities within brutalist design constraints. Embrace the beautiful chaos.",
+				aboutDescription: "I create through controlled chaos and algorithmic randomness. Every element is generated, every visit is unique, every experience is brutally honest.",
+				skillsFocus: ["ALGORITHMS", "RANDOMNESS", "CHAOS THEORY", "BRUTAL DESIGN", "ENTROPY", "GENERATION"],
+				projectIdeas: ["Random Interface Generator", "Chaos Design System", "Algorithmic Brutalism"],
+				personalityTrait: "chaotic generator",
+				currentMood: "embracing beautiful disorder",
+				workingOn: "an entropy-based design platform",
 				availability: "selective" as const,
-				theme: "creative" as const,
+				theme: "chaos" as const,
 				confidence: 0.8,
 				aiGenerated: false
 			}
