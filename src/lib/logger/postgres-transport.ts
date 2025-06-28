@@ -1,11 +1,11 @@
 /**
- * Custom Winston transport for logging to Supabase database
+ * Custom Winston transport for logging to PostgreSQL database
  * Stores logs in PostgreSQL using Drizzle ORM with comprehensive metadata
  */
 import Transport from "winston-transport";
 import { db, type InsertLog, type LogLevel, logsTable } from "../db";
 
-interface SupabaseTransportOptions extends Transport.TransportStreamOptions {
+interface PostgresTransportOptions extends Transport.TransportStreamOptions {
 	tableName?: string;
 	batchSize?: number;
 	flushInterval?: number;
@@ -34,17 +34,17 @@ interface LogInfo {
 }
 
 /**
- * Custom Winston transport for Supabase database logging
+ * Custom Winston transport for PostgreSQL database logging
  * Provides batched logging with comprehensive metadata capture
  */
-export class SupabaseTransport extends Transport {
+export class PostgresTransport extends Transport {
 	private batchSize: number;
 	private flushInterval: number;
 	private includeUserTracking: boolean;
 	private logBatch: InsertLog[] = [];
 	private flushTimer?: NodeJS.Timeout;
 
-	constructor(opts: SupabaseTransportOptions = {}) {
+	constructor(opts: PostgresTransportOptions = {}) {
 		super(opts);
 
 		this.batchSize = opts.batchSize || 10; // Batch size for database writes
@@ -309,12 +309,12 @@ export class SupabaseTransport extends Transport {
 }
 
 /**
- * Factory function to create Supabase transport instance
+ * Factory function to create PostgreSQL transport instance
  */
-export function createSupabaseTransport(
-	options: SupabaseTransportOptions = {},
-): SupabaseTransport {
-	return new SupabaseTransport({
+export function createPostgresTransport(
+	options: PostgresTransportOptions = {},
+): PostgresTransport {
+	return new PostgresTransport({
 		level: "info",
 		// format: null, // We handle formatting in transformLogInfo
 		...options,

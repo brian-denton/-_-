@@ -1,5 +1,5 @@
 /**
- * Database connection setup using Drizzle ORM with Supabase PostgreSQL
+ * Database connection setup using Drizzle ORM with PostgreSQL
  * Configured for both development and production environments
  */
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -13,10 +13,10 @@ if (!process.env.DATABASE_URL) {
 
 /**
  * Create PostgreSQL client with optimized configuration
- * Disables prepared statements for Supabase connection pooling compatibility
+ * Connection pooling and SSL configuration for production use
  */
 const client = postgres(process.env.DATABASE_URL, {
-	// Disable prepared statements for Supabase connection pooling
+	// Connection pooling configuration
 	prepare: false,
 	// Connection pool configuration
 	max: 10, // Maximum number of connections

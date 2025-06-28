@@ -1,5 +1,5 @@
-import { BrutalistHero } from "@/components/brutalist-hero";
 import { BrutalistFooter } from "@/components/brutalist-footer";
+import { BrutalistHero } from "@/components/brutalist-hero";
 
 export default function Home() {
 	return (

@@ -21,7 +21,7 @@ export default defineConfig({
 
 	// Migration settings
 	migrations: {
-		prefix: "supabase",
+		prefix: "timestamp",
 	},
 
 	// Development options - less verbose for CI

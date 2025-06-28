@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 /**
  * Drizzle Kit configuration for database migrations and schema management
- * Configured for Supabase PostgreSQL database
+ * Configured for PostgreSQL database
  */
 import { defineConfig } from "drizzle-kit";
 
@@ -25,7 +25,7 @@ export default defineConfig({
 
 	// Migration settings
 	migrations: {
-		prefix: "supabase", // Use Supabase-compatible naming format
+		prefix: "timestamp", // Use timestamp naming format
 	},
 
 	// Development options

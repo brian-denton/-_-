@@ -1,5 +1,9 @@
-CREATE TYPE "public"."log_level" AS ENUM('error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly');--> statement-breakpoint
-CREATE TABLE "log_sessions" (
+DO $$ BEGIN
+    CREATE TYPE "public"."log_level" AS ENUM('error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "log_sessions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"session_id" varchar(255) NOT NULL,
 	"user_id" uuid,
@@ -11,7 +15,7 @@ CREATE TABLE "log_sessions" (
 	CONSTRAINT "log_sessions_session_id_unique" UNIQUE("session_id")
 );
 --> statement-breakpoint
-CREATE TABLE "logs" (
+CREATE TABLE IF NOT EXISTS "logs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"level" "log_level" NOT NULL,
 	"message" text NOT NULL,
@@ -33,12 +37,12 @@ CREATE TABLE "logs" (
 	"version" varchar(50)
 );
 --> statement-breakpoint
-CREATE INDEX "log_sessions_session_id_idx" ON "log_sessions" USING btree ("session_id");--> statement-breakpoint
-CREATE INDEX "log_sessions_user_id_idx" ON "log_sessions" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX "log_sessions_last_activity_idx" ON "log_sessions" USING btree ("last_activity");--> statement-breakpoint
-CREATE INDEX "logs_timestamp_idx" ON "logs" USING btree ("timestamp");--> statement-breakpoint
-CREATE INDEX "logs_level_idx" ON "logs" USING btree ("level");--> statement-breakpoint
-CREATE INDEX "logs_user_id_idx" ON "logs" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX "logs_request_id_idx" ON "logs" USING btree ("request_id");--> statement-breakpoint
-CREATE INDEX "logs_environment_idx" ON "logs" USING btree ("environment");--> statement-breakpoint
-CREATE INDEX "logs_error_code_idx" ON "logs" USING btree ("error_code");
+CREATE INDEX IF NOT EXISTS "log_sessions_session_id_idx" ON "log_sessions" USING btree ("session_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "log_sessions_user_id_idx" ON "log_sessions" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "log_sessions_last_activity_idx" ON "log_sessions" USING btree ("last_activity");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "logs_timestamp_idx" ON "logs" USING btree ("timestamp");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "logs_level_idx" ON "logs" USING btree ("level");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "logs_user_id_idx" ON "logs" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "logs_request_id_idx" ON "logs" USING btree ("request_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "logs_environment_idx" ON "logs" USING btree ("environment");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "logs_error_code_idx" ON "logs" USING btree ("error_code");
