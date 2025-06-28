@@ -103,12 +103,41 @@
 	50% { transform: scale(1.05); }
 }
 
+@keyframes shake {
+	0%, 100% { transform: translateX(0); }
+	10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+	20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+@keyframes chaos-spin {
+	0% { transform: rotate(0deg) scale(1); }
+	25% { transform: rotate(90deg) scale(1.2); }
+	50% { transform: rotate(180deg) scale(0.8); }
+	75% { transform: rotate(270deg) scale(1.5); }
+	100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes chaos-bounce {
+	0%, 100% { transform: translateY(0) scale(1); }
+	25% { transform: translateY(-20px) scale(1.1); }
+	50% { transform: translateY(-40px) scale(0.9); }
+	75% { transform: translateY(-20px) scale(1.2); }
+}
+
 .glitch {
 	animation: glitch 0.3s infinite;
 }
 
 .brutal-pulse {
 	animation: brutal-pulse 2s infinite;
+}
+
+.chaos-spin {
+	animation: chaos-spin 2s infinite;
+}
+
+.chaos-bounce {
+	animation: chaos-bounce 1s infinite;
 }
 
 /* Brutal scrollbar */
@@ -170,4 +199,17 @@ h1, h2, h3, h4, h5, h6 {
 .btn-brutal:active {
 	@apply scale-95;
 	box-shadow: 4px 4px 0px 0px #000000;
+}
+
+/* Chaos mode specific styles */
+.chaos-active {
+	animation: shake 0.5s infinite;
+}
+
+.chaos-element {
+	animation: chaos-spin 2s infinite linear;
+}
+
+.chaos-text {
+	animation: glitch 0.3s infinite, chaos-bounce 1s infinite;
 }
