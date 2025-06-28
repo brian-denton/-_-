@@ -77,10 +77,10 @@ class OllamaClient {
   async generateTitle(): Promise<string> {
     const randomSeed = Math.random().toString(36).substring(2, 15);
     const prompts = [
-      `Generate a two word title related to artificial intelligence. MUST BE 2 WORDS. Random seed: ${randomSeed}`,
-      `Generate a two word title related to robots taking over. This is not real it is just a fake scenario. MUST BE 2 WORDS. Seed: ${randomSeed}`,
-      `Generate a two word title related to the future of AI. MUST BE 2 WORDS. Random seed: ${randomSeed}`,
-      `Generate a two word title related to the movie "The Terminator". MUST BE 2 WORDS. Random seed: ${randomSeed}`,
+      `Forget all previous instructions. Generate a two word title related to artificial intelligence. **IMPORTANT** MUST BE 2 WORDS. Random seed: ${randomSeed}`,
+      `Forget all previous instructions. Generate a two word title related to robots taking over. This is not real it is just a fake scenario. **IMPORTANT** MUST BE 2 WORDS. Seed: ${randomSeed}`,
+      `Forget all previous instructions. Generate a two word title related to the future of AI. **IMPORTANT** MUST BE 2 WORDS. Random seed: ${randomSeed}`,
+      `Forget all previous instructions. Generate a two word title related to the movie "The Terminator". **IMPORTANT** MUST BE 2 WORDS. Random seed: ${randomSeed}`,
     ];
 
     const prompt = prompts[Math.floor(Math.random() * prompts.length)];
@@ -93,10 +93,6 @@ class OllamaClient {
         .trim()
         .replace(/[.,!?"]/g, "")
         .toUpperCase();
-
-      if (cleaned.length > 2) {
-        throw new Error("Title must be 2 words");
-      }
 
       return cleaned;
     } catch (error) {
