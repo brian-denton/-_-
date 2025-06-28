@@ -1,5 +1,5 @@
-import { HeroSection } from "@/components/hero-section";
-import { AboutSection } from "@/components/about-section";
+import { DynamicHeroSection } from "@/components/dynamic-hero-section";
+import { DynamicAboutSection } from "@/components/dynamic-about-section";
 import { ProjectsSection } from "@/components/projects-section";
 import { ExperienceSection } from "@/components/experience-section";
 import { ContactSection } from "@/components/contact-section";
@@ -11,9 +11,9 @@ export default function Home() {
 		<div className="min-h-screen">
 			<Navigation />
 			<main>
-				<HeroSection />
+				<DynamicHeroSection />
 				<section id="about">
-					<AboutSection />
+					<DynamicAboutSection />
 				</section>
 				<section id="projects">
 					<ProjectsSection />
