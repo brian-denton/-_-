@@ -60,6 +60,9 @@ importers:
       winston-daily-rotate-file:
         specifier: ^5.0.0
         version: 5.0.0(winston@3.17.0)
+      winston-transport:
+        specifier: ^4.7.1
+        version: 4.9.0
     devDependencies:
       '@types/node':
         specifier: ^20
