@@ -6,9 +6,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: "DentonHub - Modern Blog Platform",
+	title: "DentonCodes",
 	description:
-		"A modern blog platform sharing insights on technology, development, and innovation.",
+		"Just a guy who loves to code. Follow my journey as I build projects, share knowledge, and explore the world of software development.",
 };
 
 export default function RootLayout({

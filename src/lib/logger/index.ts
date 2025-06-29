@@ -106,13 +106,13 @@ function createLogger() {
 
   // PostgreSQL database transport (if enabled)
   if (process.env.LOG_TO_DATABASE === "true") {
-    transports.push(
-      createPostgresTransport({
-        level: "info",
-        batchSize: 20,
-        flushInterval: 10000, // 10 seconds
-      })
-    );
+    const postgresTransport = createPostgresTransport({
+      batchSize: 20,
+      flushInterval: 10000, // 10 seconds
+    });
+
+    // Add the transport to the array
+    transports.push(postgresTransport as unknown as winston.transport);
   }
 
   return winston.createLogger({

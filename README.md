@@ -1,239 +1,191 @@
-# AI-Powered Dynamic Portfolio with MobileBERT
+# DentonCodes.com – Next.js + Ollama AI Portfolio
 
-A Next.js portfolio website that intelligently adapts to each visitor using **MobileBERT** and **Hugging Face's Inference API** for personalized content generation.
+> A full-stack site that auto-generates dynamic landing-page content with a local LLM, stores structured application logs in PostgreSQL, and ships with a colourful brutalist UI.
 
-## 🤖 AI Features
+---
 
-- **Intelligent Content Adaptation**: Uses MobileBERT to analyze user context and generate personalized content
-- **Context-Aware Personalization**: Adapts based on user agent, time of day, and browsing patterns
-- **Smart Theme Selection**: AI determines the optimal visual theme based on generated content
-- **Personality-Driven Content**: Content adapts to different professional personalities (creative, technical, innovative, professional)
-- **Real-time Classification**: Uses zero-shot classification for dynamic content categorization
+## ✨ Features
 
-## 🚀 Tech Stack
+- **Next.js 15 / React 19** – App Router, Server & Edge runtimes.
+- **Tailwind CSS** – Utility-first styling with dark-mode support.
+- **AI-powered content** – Local [Ollama](https://ollama.ai/) LLM generates titles, subtitles, bios, and more.
+- **Drizzle ORM + PostgreSQL** – Type-safe schema & migrations for log storage.
+- **Winston logging pipeline** – Console, rotating files, and DB transport with request/session metadata.
+- **Edge Middleware** – Global request logging even before hitting the server.
+- **Composable UI** – Brutalist hero, footer, and Radix-based primitives.
 
-- **Frontend**: Next.js 15, React 19, TypeScript
-- **Styling**: Tailwind CSS, shadcn/ui components
-- **AI**: MobileBERT via Hugging Face Inference API
-- **Database**: Supabase PostgreSQL with Drizzle ORM
-- **Logging**: Winston with comprehensive monitoring
+---
 
-## 📋 Prerequisites
+## 🗂️ Project layout (high-level)
 
-1. **Node.js 18+** installed
-2. **Hugging Face API Key** (free tier available)
-3. **Supabase account** (optional, for logging)
-
-### Setting up Hugging Face
-
-1. Create account at [https://huggingface.co](https://huggingface.co)
-2. Generate API key at [https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
-3. Add to your environment variables
-
-## 🛠 Installation
-
-1. **Clone and install dependencies**:
-   ```bash
-   git clone <repository-url>
-   cd portfolio
-   npm install
-   ```
-
-2. **Environment setup**:
-   ```bash
-   cp .env.example .env.local
-   ```
-   
-   Configure your environment variables:
-   ```env
-   # Hugging Face Configuration
-   HUGGINGFACE_API_KEY=your-huggingface-api-key
-   
-   # Supabase (optional, for logging)
-   NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-   DATABASE_URL=your-database-url
-   ```
-
-3. **Start development server**:
-   ```bash
-   npm run dev
-   ```
-
-## 🎯 How It Works
-
-### AI-Powered Content Generation Flow
-
-1. **Context Analysis**: When someone visits the portfolio, MobileBERT analyzes:
-   - User agent (browser/device information)
-   - Time of day and day of week
-   - Previous interaction patterns
-
-2. **Personality Classification**: The system uses zero-shot classification to determine the optimal personality:
-   - **Professional**: Corporate-focused, reliable, business-oriented
-   - **Creative**: Design-focused, artistic, visually-driven
-   - **Technical**: Engineering-focused, performance-oriented
-   - **Innovative**: Cutting-edge, experimental, future-focused
-
-3. **Content Generation**: Based on the determined personality, the system generates:
-   - Hero title and subtitle
-   - Personal description and about section
-   - Current focus areas and skills
-   - Project ideas and current work
-   - Professional mood and availability status
-
-4. **Theme Selection**: AI analyzes the generated content to determine the visual theme
-5. **Caching**: Content is cached for 30 minutes to balance freshness with performance
-
-### MobileBERT Models Used
-
-- **Zero-Shot Classification**: `facebook/bart-large-mnli` for personality and theme classification
-- **Question Answering**: `distilbert-base-cased-distilled-squad` for content extraction
-- **Text Classification**: `google/mobilebert-uncased` for content analysis
-
-## 🔧 Configuration
-
-### AI Model Settings
-
-Customize AI behavior in `src/lib/ai/mobilebert-client.ts`:
-
-```typescript
-// Models can be changed to other Hugging Face models
-this.classificationModel = "google/mobilebert-uncased";
-this.qaModel = "distilbert-base-cased-distilled-squad";
-this.zeroShotModel = "facebook/bart-large-mnli";
+```text
+├─ src/
+│  ├─ app/            # Next.js pages, layouts & API routes
+│  ├─ components/     # Presentational React components
+│  ├─ hooks/          # Reusable React hooks
+│  ├─ lib/
+│  │  ├─ ai/          # Ollama client & content generator
+│  │  ├─ db/          # Drizzle schema & database helpers
+│  │  └─ logger/      # Multi-transport Winston logger
+│  └─ middleware.ts   # Edge-runtime logger
+├─ drizzle/           # SQL migrations & journal
+├─ docs/LOGGING.md    # Extended logger docs
+├─ OLLAMA_SETUP.md    # Local LLM installation guide
+└─ README.md          # ← you are here
 ```
 
-### Content Caching
+---
 
-Adjust cache duration in `src/hooks/use-dynamic-content.ts`:
+## ⚙️ Prerequisites
 
-```typescript
-const maxAge = 30 * 60 * 1000; // 30 minutes
+1. **Node.js ≥ 20** (18 works but 20+ recommended for 🧩 built-in `fetch`).
+2. **pnpm** package manager – `npm install -g pnpm`.
+3. **PostgreSQL 14+** – local instance or cloud (Supabase, Railway, Render, …).
+4. **Ollama** – follow [OLLAMA_SETUP.md](./OLLAMA_SETUP.md) to install a local model.
+
+---
+
+## 🏗️ Setup
+
+### 1. Clone & install dependencies
+
+```bash
+pnpm install
 ```
 
-### Personality Weights
+### 2. Environment variables
 
-Modify personality selection probability in `src/lib/ai/content-generator.ts`:
+Create a `.env.local` file in the project root:
 
-```typescript
-// Adjust these weights to favor certain personalities
-const personalities = [
-  "professional and corporate focused",    // 25%
-  "creative and design oriented",          // 25%
-  "technical and engineering focused",     // 25%
-  "innovative and cutting-edge"           // 25%
-];
+```dotenv
+# --- Runtime ---
+NODE_ENV=development
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# --- Database ---
+DATABASE_URL=postgresql://postgres:password@localhost:5432/dentoncodes
+
+# --- Logging ---
+LOG_LEVEL=info                # error | warn | info | http | verbose | debug | silly
+LOG_TO_FILE=true              # rotates logs in ./logs/
+LOG_TO_DATABASE=true          # enables postgres transport
+LOG_RETENTION_DAYS=30d        # for file rotation
+
+# --- Edge logger ---
+EDGE_LOG_ENDPOINT=http://localhost:3000/api/edge-logs
+
+# --- Ollama ---
+OLLAMA_API_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
 ```
 
-## 📊 Monitoring & Analytics
+> **Tip**: The original `env.example` was removed from git history—copy the block above instead.
 
-The application includes comprehensive logging:
+### 3. Database 💾
 
-- **AI Performance Metrics**: Response times, confidence scores, model performance
-- **Content Analytics**: Personality distribution, theme selection patterns
-- **User Context**: Anonymized user agent analysis, timing patterns
-- **Error Tracking**: Fallback usage, API failures, generation errors
+1. Create the database indicated in `DATABASE_URL`.
+2. Run migrations generated by Drizzle:
 
-## 🎨 Customization
+```bash
+# generate or update SQL (edit schema first)
+pnpm run db:generate
 
-### Adding New Personalities
-
-1. **Update personality list** in `src/lib/ai/mobilebert-client.ts`
-2. **Add content templates** in `src/lib/ai/content-generator.ts`
-3. **Define visual themes** in `src/components/dynamic-hero-section.tsx`
-
-### Custom Content Types
-
-1. **Define new content types** in the `GeneratedContent` interface
-2. **Add generation logic** in `ContentGenerator` class
-3. **Update UI components** to display new content
-
-### Theme Customization
-
-Add new themes in `src/components/dynamic-hero-section.tsx`:
-
-```typescript
-const themeStyles = {
-  // ... existing themes
-  yourTheme: "from-your-color via-background to-your-color"
-};
+# apply pending migrations
+pnpm run db:push
 ```
 
-## 🚀 Deployment
+### 4. Pull an LLM model (once)
 
-### Production Considerations
-
-1. **Hugging Face API Limits**: Monitor usage and upgrade plan if needed
-2. **Caching Strategy**: Consider Redis for distributed caching
-3. **Error Handling**: Ensure robust fallbacks for API failures
-4. **Performance**: Monitor AI response times and optimize accordingly
-
-### Environment Variables
-
-Set these in your production environment:
-
-```env
-HUGGINGFACE_API_KEY=your-production-api-key
-NODE_ENV=production
-# ... other production variables
+```bash
+ollama pull llama3.2   # or another model listed in OLLAMA_SETUP.md
 ```
 
-## 🔍 Troubleshooting
+---
 
-### Common Issues
+## ▶️ Running the app
 
-**Hugging Face API Errors**:
-- Verify API key is correct and active
-- Check rate limits and usage quotas
-- Ensure models are accessible (some require approval)
+```bash
+pnpm dev
+```
 
-**Slow Content Generation**:
-- Consider using smaller/faster models
-- Implement request queuing for high traffic
-- Optimize caching strategy
+Visit `http://localhost:3000` – the brutalist hero section will fetch fresh AI-generated copy. Every request (including static page hits) is logged to console and PostgreSQL.
 
-**Content Not Updating**:
-- Clear browser localStorage
-- Check cache expiration settings
-- Verify API endpoint accessibility
+---
 
-**Fallback Content Always Showing**:
-- Check Hugging Face API connectivity
-- Verify API key permissions
-- Review error logs for specific issues
+## 📡 API Routes
 
-## 📈 Performance
+| Method                  | Path                    | Purpose                                   |
+| ----------------------- | ----------------------- | ----------------------------------------- |
+| `GET \| POST`           | `/api/generate-content` | Generate / re-generate AI portfolio text. |
+| `GET \| POST \| DELETE` | `/api/logs`             | Read, write, delete log entries.          |
+| `GET \| POST`           | `/api/edge-logs`        | Receive logs emitted from Edge runtime.   |
 
-- **Generation Time**: Typically 1-3 seconds with MobileBERT
-- **Cache Hit Rate**: ~90% for repeat visitors within 30 minutes
-- **Fallback Usage**: <5% when Hugging Face API is properly configured
-- **Bundle Size**: Optimized with Next.js automatic code splitting
+More details inside [`src/app/api/README.md`](./src/app/api/README.md).
 
-## 🤝 Contributing
+---
 
-1. Fork the repository
-2. Create a feature branch
-3. Test with different AI-generated content scenarios
-4. Submit a pull request
+## 🔍 Logging system (summary)
 
-## 📄 License
+1. **Edge** – `middleware.ts` captures every request early, builds a minimal context, and **POSTs** it to `/api/edge-logs`.
+2. **Server/API** – Route handlers create a per-request logger via `createRequestLogger()`.
+3. **Core logger** – `src/lib/logger/index.ts` pipes messages to:
+   - **Console** (pretty-printed in dev)
+   - **Daily-rotate files** (if `LOG_TO_FILE=true`)
+   - **Postgres transport** (`logs` table) batching inserts (if `LOG_TO_DATABASE=true`).
 
-MIT License - see LICENSE file for details.
+Expanded docs: [docs/LOGGING.md](./docs/LOGGING.md).
 
-## 🙏 Acknowledgments
+---
 
-- **Hugging Face** for providing excellent AI models and APIs
-- **MobileBERT** team at Google for the efficient BERT model
-- **shadcn/ui** for beautiful components
-- **Next.js** team for the amazing framework
+## 🤖 AI content generation (summary)
 
-## 🔮 Future Enhancements
+```mermaid
+flowchart LR
+    hook[useDynamicContent (React hook)] -->|fetch| API[/api/generate-content]
+    API -->|calls| generator[ContentGenerator]
+    generator -->|LLM| ollama[OllamaClient]
+```
 
-- [ ] Multi-language content generation
-- [ ] A/B testing for different personalities
-- [ ] Real-time content optimization based on user engagement
-- [ ] Integration with analytics for content performance tracking
-- [ ] Custom model fine-tuning for domain-specific content
-- [ ] Voice-based content generation
-- [ ] Image generation for dynamic visual content
+- **Fail-safe**: If the LLM is offline the generator falls back to deterministic random strings so the site never breaks.
+- **Themes**: Pass `x-theme: chaos` header or `{ theme: "chaos" }` in POST body to force glitchy copy.
+
+---
+
+## 💻 Scripts
+
+| Script              | Purpose                                           |
+| ------------------- | ------------------------------------------------- |
+| `pnpm dev`          | Start Next.js in development mode.                |
+| `pnpm build`        | Compile & bundle for production.                  |
+| `pnpm start`        | Start the production server (after `build`).      |
+| `pnpm db:generate`  | Re-generate SQL from `schema.ts`.                 |
+| `pnpm db:push`      | Apply migrations to the DB.                       |
+| `pnpm db:migrate`   | Run Drizzle migrations in production.             |
+| `pnpm db:studio`    | Visual schema explorer.                           |
+| `pnpm logs:cleanup` | Reminder to use `DELETE /api/logs` for retention. |
+| `pnpm logs:test`    | Prints info on how to create test logs via UI.    |
+
+---
+
+## 🐳 Deployment notes
+
+1. **Database** – supply `DATABASE_URL` env on the hosting platform (Supabase, Railway, Neon, …).
+2. **Edge logging** – point `EDGE_LOG_ENDPOINT` to the production domain or disable it.
+3. **Ollama** – For serverless hosting you'll need a remote Ollama instance; otherwise set `OLLAMA_API_URL` to a public URL.
+4. **Static assets** – Next.js App Router outputs an `app/` build compatible with Vercel, Netlify, Fly.io, etc.
+
+---
+
+## 🧑‍💻 Contributing
+
+1. Fork & clone the repo.
+2. `pnpm install`
+3. Create a feature branch
+4. Commit using [Conventional Commits](https://www.conventionalcommits.org/).
+5. Open a PR – GitHub Actions (CI) will lint, type-check, and run build.
+
+---
+
+## 📜 License
+
+MIT © 2025 Denton Codes
