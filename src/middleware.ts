@@ -6,6 +6,7 @@
 
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { checkRateLimit } from "./lib/security/rate-limit";
 import {
 	type EdgeRequestContext,
 	extractEdgeRequestContext,
@@ -13,25 +14,67 @@ import {
 	logEdgeHttpRequest,
 } from "./lib/logger/edge-logger";
 
+const RATE_LIMIT_WINDOW = 60_000; // 1 minute
+const RATE_LIMIT_MAX = 50; // max requests per IP per window
+
+function applySecurityHeaders(response: NextResponse) {
+        response.headers.set("X-DNS-Prefetch-Control", "on");
+        response.headers.set("X-Frame-Options", "SAMEORIGIN");
+        response.headers.set("X-Content-Type-Options", "nosniff");
+        response.headers.set(
+                "Strict-Transport-Security",
+                "max-age=63072000; includeSubDomains; preload",
+        );
+        response.headers.set(
+                "Referrer-Policy",
+                "strict-origin-when-cross-origin",
+        );
+        response.headers.set(
+                "Permissions-Policy",
+                "camera=(), microphone=(), geolocation=()",
+        );
+        response.headers.set(
+                "Content-Security-Policy",
+                "default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'",
+        );
+}
+
 /**
  * Main middleware function
  * Logs all incoming requests with comprehensive metadata
  */
 export async function middleware(request: NextRequest) {
-	const startTime = Date.now();
+        const startTime = Date.now();
 
-	// Extract request context for logging
-	const context: EdgeRequestContext = {
-		...extractEdgeRequestContext(request),
-		startTime,
-	};
+        // Extract request context for logging
+        const context: EdgeRequestContext = {
+                ...extractEdgeRequestContext(request),
+                startTime,
+        };
 
-	try {
-		// Continue with the request
-		const response = NextResponse.next();
+        try {
+                if (request.nextUrl.pathname.startsWith('/api')) {
+                        const ip =
+                                request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                                request.headers.get('x-real-ip') ||
+                                'unknown';
+                        const allowed = checkRateLimit(ip, {
+                                windowMs: RATE_LIMIT_WINDOW,
+                                maxRequests: RATE_LIMIT_MAX,
+                        });
+                        if (!allowed) {
+                                return NextResponse.json(
+                                        { error: 'Too many requests' },
+                                        { status: 429 },
+                                );
+                        }
+                }
+                // Continue with the request
+                const response = NextResponse.next();
 
-		// Add request ID to response headers for debugging
-		response.headers.set("x-request-id", context.requestId);
+                // Add request ID to response headers for debugging
+                response.headers.set("x-request-id", context.requestId);
+                applySecurityHeaders(response);
 
 		// Calculate response time
 		const responseTime = Date.now() - startTime;
@@ -51,10 +94,10 @@ export async function middleware(request: NextRequest) {
 			});
 		}
 
-		return response;
-	} catch (error) {
-		// Log any middleware errors
-		const responseTime = Date.now() - startTime;
+                return response;
+        } catch (error) {
+                // Log any middleware errors
+                const responseTime = Date.now() - startTime;
 
 		logEdgeError(
 			error instanceof Error ? error : new Error("Unknown middleware error"),
@@ -65,17 +108,19 @@ export async function middleware(request: NextRequest) {
 			},
 		);
 
-		// Return error response
-		return NextResponse.json(
-			{ error: "Internal Server Error" },
-			{
-				status: 500,
-				headers: {
-					"x-request-id": context.requestId,
-				},
-			},
-		);
-	}
+                // Return error response
+                const errorResponse = NextResponse.json(
+                        { error: "Internal Server Error" },
+                        {
+                                status: 500,
+                                headers: {
+                                        "x-request-id": context.requestId,
+                                },
+                        },
+                );
+                applySecurityHeaders(errorResponse);
+                return errorResponse;
+        }
 }
 
 /**
@@ -83,13 +128,14 @@ export async function middleware(request: NextRequest) {
  * Reduces noise from static assets and health checks
  */
 function shouldSkipPath(pathname: string): boolean {
-	const skipPatterns = [
-		"/_next/static", // Next.js static assets
-		"/_next/image", // Next.js image optimization
-		"/favicon.ico", // Favicon requests
-		"/robots.txt", // SEO files
-		"/sitemap.xml", // SEO files
-		"/health", // Health check endpoints
+        const skipPatterns = [
+                "/_next/static", // Next.js static assets
+                "/_next/image", // Next.js image optimization
+                "/favicon.ico", // Favicon requests
+                "/api", // API routes handle their own logging
+                "/robots.txt", // SEO files
+                "/sitemap.xml", // SEO files
+                "/health", // Health check endpoints
 		"/ping", // Ping endpoints
 		"/.well-known", // Well-known URIs
 	];
@@ -99,17 +145,15 @@ function shouldSkipPath(pathname: string): boolean {
 
 /**
  * Configure which paths the middleware should run on
- * Excludes API routes that handle their own logging
  */
 export const config = {
 	matcher: [
-		/*
-		 * Match all request paths except:
-		 * - _next/static (static files)
-		 * - _next/image (image optimization files)
-		 * - favicon.ico (favicon file)
-		 * - API routes (they handle their own logging)
-		 */
-		"/((?!api|_next/static|_next/image|favicon.ico).*)",
-	],
+                /*
+                 * Match all request paths except:
+                 * - _next/static (static files)
+                 * - _next/image (image optimization files)
+                 * - favicon.ico (favicon file)
+                 */
+                "/((?!_next/static|_next/image|favicon.ico).*)",
+        ],
 };
