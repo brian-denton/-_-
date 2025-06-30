@@ -17,27 +17,8 @@ import {
 const RATE_LIMIT_WINDOW = 60_000; // 1 minute
 const RATE_LIMIT_MAX = 50; // max requests per IP per window
 
-function applySecurityHeaders(response: NextResponse, nonce: string) {
+function applySecurityHeaders(response: NextResponse) {
   const isDev = process.env.NODE_ENV === "development";
-
-  // Generate CSP with nonce
-  const cspHeader = `
-    default-src 'self';
-    script-src 'self' 'nonce-${nonce}' ${
-    isDev ? "'unsafe-eval' 'unsafe-inline'" : "'strict-dynamic'"
-  };
-    style-src 'self' 'nonce-${nonce}' 'unsafe-inline';
-    img-src 'self' data: blob:;
-    font-src 'self' data:;
-    object-src 'none';
-    base-uri 'self';
-    form-action 'self';
-    frame-ancestors 'none';
-    ${isDev ? "" : "upgrade-insecure-requests;"}
-    connect-src 'self' ${isDev ? "ws: wss:" : ""};
-  `
-    .replace(/\s{2,}/g, " ")
-    .trim();
 
   response.headers.set("X-DNS-Prefetch-Control", "on");
   response.headers.set("X-Frame-Options", "SAMEORIGIN");
@@ -51,7 +32,6 @@ function applySecurityHeaders(response: NextResponse, nonce: string) {
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=()"
   );
-  response.headers.set("Content-Security-Policy", cspHeader);
 }
 
 /**
@@ -60,9 +40,6 @@ function applySecurityHeaders(response: NextResponse, nonce: string) {
  */
 export async function middleware(request: NextRequest) {
   const startTime = Date.now();
-
-  // Generate nonce for CSP
-  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
   // Extract request context for logging
   const context: EdgeRequestContext = {
@@ -87,21 +64,12 @@ export async function middleware(request: NextRequest) {
         );
       }
     }
-
-    // Create new headers and add nonce
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set("x-nonce", nonce);
-
     // Continue with the request
-    const response = NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
+    const response = NextResponse.next();
 
     // Add request ID to response headers for debugging
     response.headers.set("x-request-id", context.requestId);
-    applySecurityHeaders(response, nonce);
+    applySecurityHeaders(response);
 
     // Calculate response time
     const responseTime = Date.now() - startTime;
@@ -145,7 +113,7 @@ export async function middleware(request: NextRequest) {
         },
       }
     );
-    applySecurityHeaders(errorResponse, nonce);
+    applySecurityHeaders(errorResponse);
     return errorResponse;
   }
 }
@@ -181,12 +149,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    {
-      source: "/((?!_next/static|_next/image|favicon.ico).*)",
-      missing: [
-        { type: "header", key: "next-router-prefetch" },
-        { type: "header", key: "purpose", value: "prefetch" },
-      ],
-    },
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
