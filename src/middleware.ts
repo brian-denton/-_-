@@ -17,8 +17,27 @@ import {
 const RATE_LIMIT_WINDOW = 60_000; // 1 minute
 const RATE_LIMIT_MAX = 50; // max requests per IP per window
 
-function applySecurityHeaders(response: NextResponse) {
+function applySecurityHeaders(response: NextResponse, nonce: string) {
   const isDev = process.env.NODE_ENV === "development";
+
+  // Generate CSP with nonce
+  const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'nonce-${nonce}' ${
+    isDev ? "'unsafe-eval' 'unsafe-inline'" : "'strict-dynamic'"
+  };
+    style-src 'self' 'nonce-${nonce}' 'unsafe-inline';
+    img-src 'self' data: blob:;
+    font-src 'self' data:;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+    ${isDev ? "" : "upgrade-insecure-requests;"}
+    connect-src 'self' ${isDev ? "ws: wss:" : ""};
+  `
+    .replace(/\s{2,}/g, " ")
+    .trim();
 
   response.headers.set("X-DNS-Prefetch-Control", "on");
   response.headers.set("X-Frame-Options", "SAMEORIGIN");
@@ -32,12 +51,7 @@ function applySecurityHeaders(response: NextResponse) {
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=()"
   );
-  response.headers.set(
-    "Content-Security-Policy",
-    isDev
-      ? "default-src 'self'; img-src 'self' data: blob:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws: wss:; font-src 'self' data:;"
-      : "default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; font-src 'self' data:;"
-  );
+  response.headers.set("Content-Security-Policy", cspHeader);
 }
 
 /**
@@ -46,6 +60,9 @@ function applySecurityHeaders(response: NextResponse) {
  */
 export async function middleware(request: NextRequest) {
   const startTime = Date.now();
+
+  // Generate nonce for CSP
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
   // Extract request context for logging
   const context: EdgeRequestContext = {
@@ -70,12 +87,21 @@ export async function middleware(request: NextRequest) {
         );
       }
     }
+
+    // Create new headers and add nonce
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-nonce", nonce);
+
     // Continue with the request
-    const response = NextResponse.next();
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
 
     // Add request ID to response headers for debugging
     response.headers.set("x-request-id", context.requestId);
-    applySecurityHeaders(response);
+    applySecurityHeaders(response, nonce);
 
     // Calculate response time
     const responseTime = Date.now() - startTime;
@@ -119,7 +145,7 @@ export async function middleware(request: NextRequest) {
         },
       }
     );
-    applySecurityHeaders(errorResponse);
+    applySecurityHeaders(errorResponse, nonce);
     return errorResponse;
   }
 }
@@ -155,6 +181,12 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    {
+      source: "/((?!_next/static|_next/image|favicon.ico).*)",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
   ],
 };
