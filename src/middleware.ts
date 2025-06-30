@@ -18,8 +18,6 @@ const RATE_LIMIT_WINDOW = 60_000; // 1 minute
 const RATE_LIMIT_MAX = 50; // max requests per IP per window
 
 function applySecurityHeaders(response: NextResponse) {
-  const isDev = process.env.NODE_ENV === "development";
-
   response.headers.set("X-DNS-Prefetch-Control", "on");
   response.headers.set("X-Frame-Options", "SAMEORIGIN");
   response.headers.set("X-Content-Type-Options", "nosniff");
